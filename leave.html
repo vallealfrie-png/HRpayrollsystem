@@ -15,6 +15,7 @@
                         brand: {
                             50: '#f0fdf4',
                             100: '#dcfce7',
+                            200: '#bbf7d0',
                             500: '#22c55e',
                             600: '#16a34a',
                             700: '#15803d',
@@ -40,8 +41,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 
     <!-- AOS (Animate On Scroll) CSS -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
@@ -61,11 +62,6 @@
 
     <style>
         body { font-family: 'Inter', sans-serif; }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(226, 232, 240, 0.8);
-        }
         .custom-scrollbar::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -80,477 +76,703 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
+        .skeleton {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+        }
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
     </style>
 </head>
-<body class="h-full antialiased text-slate-800 flex flex-col min-h-screen">
+<body class="h-full antialiased text-slate-800 flex bg-slate-50 overflow-x-hidden">
 
     <!-- Toast Notification Container -->
     <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3 max-w-sm w-full pointer-events-none"></div>
 
-    <!-- Main Container -->
-    <div class="flex-1 flex flex-col max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebar-backdrop" onclick="toggleMobileSidebar()" class="fixed inset-0 z-30 bg-slate-900/50 backdrop-blur-sm hidden transition-opacity duration-300 lg:hidden"></div>
 
-        <!-- Page Header -->
-        <header class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80" data-aos="fade-down">
-            <div class="flex items-center gap-4">
-                <!-- Option A: Back to Main Dashboard Link -->
-                <a href="index.html" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-all duration-200 active:scale-95" title="Back to Dashboard">
-                    <i class="fa-solid fa-arrow-left"></i>
-                </a>
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="fixed top-0 left-0 bottom-0 z-40 w-64 bg-slate-900 text-slate-300 flex flex-col transition-transform duration-300 -translate-x-full lg:translate-x-0 border-r border-slate-800">
+        <!-- Sidebar Brand Header -->
+        <div class="h-16 flex items-center justify-between px-6 bg-slate-950/50 border-b border-slate-800">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center text-white font-bold">
+                    <i data-lucide="building-2" class="w-5 h-5"></i>
+                </div>
+                <span class="font-bold text-white tracking-wide text-base">Enterprise HR</span>
+            </div>
+            <button onclick="toggleMobileSidebar()" class="lg:hidden text-slate-400 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
 
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-700">
-                        <i class="fa-solid me-0 fa-calendar-check text-xl"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-2xl font-bold tracking-tight text-slate-900">Leave Management</h1>
-                        <p class="text-sm text-slate-500">Manage employee leave requests, approvals, and leave activity.</p>
+        <!-- Sidebar Navigation -->
+        <nav class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-6">
+            <!-- MAIN SECTION -->
+            <div>
+                <div class="px-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Main</div>
+                <ul class="space-y-1">
+                    <li>
+                        <a href="index.html" class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium hover:bg-slate-800 hover:text-white transition-colors">
+                            <i data-lucide="layout-dashboard" class="w-4 h-4 text-slate-400"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium hover:bg-slate-800 hover:text-white transition-colors">
+                            <i data-lucide="users" class="w-4 h-4 text-slate-400"></i>
+                            <span>Employees</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium hover:bg-slate-800 hover:text-white transition-colors">
+                            <i data-lucide="clock" class="w-4 h-4 text-slate-400"></i>
+                            <span>Attendance</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="leave.html" class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-semibold bg-brand-600/10 text-brand-400 border border-brand-500/20 transition-colors">
+                            <i data-lucide="calendar-days" class="w-4 h-4 text-brand-400"></i>
+                            <span>Leave Management</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium hover:bg-slate-800 hover:text-white transition-colors">
+                            <i data-lucide="badge-dollar-sign" class="w-4 h-4 text-slate-400"></i>
+                            <span>Payroll</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- MANAGEMENT SECTION -->
+            <div>
+                <div class="px-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Management</div>
+                <ul class="space-y-1">
+                    <li>
+                        <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium hover:bg-slate-800 hover:text-white transition-colors">
+                            <i data-lucide="building" class="w-4 h-4 text-slate-400"></i>
+                            <span>Departments</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium hover:bg-slate-800 hover:text-white transition-colors">
+                            <i data-lucide="briefcase" class="w-4 h-4 text-slate-400"></i>
+                            <span>Positions</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium hover:bg-slate-800 hover:text-white transition-colors">
+                            <i data-lucide="file-bar-chart" class="w-4 h-4 text-slate-400"></i>
+                            <span>Reports</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium hover:bg-slate-800 hover:text-white transition-colors">
+                            <i data-lucide="settings" class="w-4 h-4 text-slate-400"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Sidebar User Footer -->
+        <div class="p-4 border-t border-slate-800 bg-slate-950/30 flex items-center justify-between">
+            <div class="flex items-center gap-3 overflow-hidden">
+                <div class="w-9 h-9 rounded-full bg-brand-700 flex items-center justify-center font-bold text-white text-xs flex-shrink-0" id="sidebar-user-avatar">
+                    HR
+                </div>
+                <div class="truncate">
+                    <div class="text-xs font-semibold text-white truncate" id="sidebar-user-name">HR Manager</div>
+                    <div class="text-[11px] text-slate-500 truncate" id="sidebar-user-email">hr@company.com</div>
+                </div>
+            </div>
+            <button title="Logout" onclick="handleLogout()" class="text-slate-400 hover:text-rose-400 p-1.5 rounded-lg hover:bg-slate-800 transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTAINER -->
+    <div class="flex-1 flex flex-col min-w-0 lg:pl-64 min-h-screen">
+
+        <!-- TOP HEADER NAVBAR -->
+        <header class="h-16 bg-white border-b border-slate-200/80 sticky top-0 z-20 flex items-center justify-between px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center gap-3">
+                <button onclick="toggleMobileSidebar()" class="lg:hidden text-slate-600 hover:text-slate-900 p-2 rounded-lg hover:bg-slate-100">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+                <div>
+                    <h2 class="text-base font-bold text-slate-900 leading-none">Leave Management</h2>
+                    <div class="text-xs text-slate-500 mt-1 flex items-center gap-1.5">
+                        <i data-lucide="clock" class="w-3 h-3 text-slate-400"></i>
+                        <span id="header-ph-datetime">--</span>
                     </div>
                 </div>
             </div>
-            
-            <div class="flex items-center gap-3">
-                <button id="btn-refresh" onclick="refreshAllData()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-xl transition-all duration-200 active:scale-95">
-                    <i class="fa-solid fa-rotate-right text-xs" id="refresh-icon"></i>
-                    <span>Refresh</span>
+
+            <div class="flex items-center gap-3 sm:gap-4">
+                <div class="relative hidden sm:block w-64">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                    <input type="text" id="global-search" placeholder="Search system..." class="w-full pl-9 pr-4 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600 transition-all">
+                </div>
+
+                <button class="relative p-2 text-slate-500 hover:text-slate-800 rounded-xl hover:bg-slate-100 transition-colors">
+                    <i data-lucide="bell" class="w-5 h-5"></i>
+                    <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500"></span>
                 </button>
-                <button onclick="openCreateModal()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-700 hover:bg-brand-800 text-white text-sm font-semibold rounded-xl shadow-sm shadow-brand-700/20 transition-all duration-200 active:scale-95">
-                    <i class="fa-solid fa-plus text-xs"></i>
-                    <span>Add Leave Request</span>
-                </button>
+
+                <div class="h-8 w-px bg-slate-200"></div>
+
+                <div class="flex items-center gap-2.5 cursor-pointer">
+                    <div class="w-8 h-8 rounded-full bg-slate-200 border border-slate-300 flex items-center justify-center font-bold text-slate-700 text-xs" id="top-user-avatar">
+                        HR
+                    </div>
+                </div>
             </div>
         </header>
 
-        <!-- Dynamic Statistics / Summary Cards -->
-        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4" id="kpi-cards-container">
-            <!-- Total Requests -->
-            <div class="kpi-card bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden group" data-aos="fade-up" data-aos-delay="50">
-                <div class="absolute right-0 top-0 w-2 h-full bg-slate-400"></div>
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Requests</span>
-                    <span class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600"><i class="fa-solid fa-folder-open text-xs"></i></span>
-                </div>
-                <div class="mt-3">
-                    <h3 class="text-2xl font-bold text-slate-900" id="kpi-total">--</h3>
-                    <p class="text-xs text-slate-400 mt-1">All recorded logs</p>
-                </div>
-            </div>
+        <!-- CONTENT BODY -->
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto space-y-6">
 
-            <!-- Pending Requests -->
-            <div class="kpi-card bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden group" data-aos="fade-up" data-aos-delay="100">
-                <div class="absolute right-0 top-0 w-2 h-full bg-amber-500"></div>
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-amber-700">Pending</span>
-                    <span class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600"><i class="fa-solid fa-clock text-xs"></i></span>
-                </div>
-                <div class="mt-3">
-                    <h3 class="text-2xl font-bold text-slate-900" id="kpi-pending">--</h3>
-                    <p class="text-xs text-amber-600 font-medium mt-1">Awaiting approval</p>
-                </div>
-            </div>
-
-            <!-- Approved Requests -->
-            <div class="kpi-card bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden group" data-aos="fade-up" data-aos-delay="150">
-                <div class="absolute right-0 top-0 w-2 h-full bg-brand-600"></div>
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-brand-700">Approved</span>
-                    <span class="w-8 h-8 rounded-lg bg-brand-50 flex items-center justify-center text-brand-600"><i class="fa-solid fa-circle-check text-xs"></i></span>
-                </div>
-                <div class="mt-3">
-                    <h3 class="text-2xl font-bold text-slate-900" id="kpi-approved">--</h3>
-                    <p class="text-xs text-brand-600 font-medium mt-1">Cleared leaves</p>
-                </div>
-            </div>
-
-            <!-- Rejected Requests -->
-            <div class="kpi-card bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden group" data-aos="fade-up" data-aos-delay="200">
-                <div class="absolute right-0 top-0 w-2 h-full bg-rose-500"></div>
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-rose-700">Rejected</span>
-                    <span class="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center text-rose-600"><i class="fa-solid fa-circle-xmark text-xs"></i></span>
-                </div>
-                <div class="mt-3">
-                    <h3 class="text-2xl font-bold text-slate-900" id="kpi-rejected">--</h3>
-                    <p class="text-xs text-rose-600 font-medium mt-1">Disapproved requests</p>
-                </div>
-            </div>
-
-            <!-- Cancelled Requests -->
-            <div class="kpi-card bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden group" data-aos="fade-up" data-aos-delay="250">
-                <div class="absolute right-0 top-0 w-2 h-full bg-slate-500"></div>
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-600">Cancelled</span>
-                    <span class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500"><i class="fa-solid fa-ban text-xs"></i></span>
-                </div>
-                <div class="mt-3">
-                    <h3 class="text-2xl font-bold text-slate-900" id="kpi-cancelled">--</h3>
-                    <p class="text-xs text-slate-500 font-medium mt-1">Withdrawn by user</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Filters & Search Section -->
-        <section class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm" data-aos="fade-up">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
-                <!-- Search -->
-                <div class="lg:col-span-2">
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Search Employee</label>
-                    <div class="relative">
-                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                        <input type="text" id="filter-search" placeholder="Name or Employee ID..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600 transition-all">
+            <!-- PAGE HEADER -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm" data-aos="fade-down">
+                <div>
+                    <!-- Breadcrumbs -->
+                    <div class="flex items-center gap-2 text-xs text-slate-500 mb-1">
+                        <a href="index.html" class="hover:text-brand-700 transition-colors">Dashboard</a>
+                        <i data-lucide="chevron-right" class="w-3 h-3"></i>
+                        <span class="text-slate-800 font-medium">Leave Management</span>
                     </div>
+                    <h1 class="text-2xl font-bold tracking-tight text-slate-900">Leave Management</h1>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-1">Manage employee leave requests, approvals, balances and utilization.</p>
                 </div>
 
-                <!-- Department -->
-                <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Department</label>
-                    <select id="filter-department" class="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600 transition-all">
-                        <option value="">All Departments</option>
-                    </select>
-                </div>
-
-                <!-- Leave Type -->
-                <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Leave Type</label>
-                    <select id="filter-type" class="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600 transition-all">
-                        <option value="">All Types</option>
-                        <option value="VACATION">Vacation</option>
-                        <option value="SICK">Sick</option>
-                        <option value="EMERGENCY">Emergency</option>
-                        <option value="MATERNITY">Maternity</option>
-                        <option value="PATERNITY">Paternity</option>
-                        <option value="SOLO_PARENT">Solo Parent</option>
-                        <option value="SPECIAL">Special</option>
-                        <option value="OTHER">Other</option>
-                    </select>
-                </div>
-
-                <!-- Status -->
-                <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Status</label>
-                    <select id="filter-status" class="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600 transition-all">
-                        <option value="">All Statuses</option>
-                        <option value="PENDING">Pending</option>
-                        <option value="APPROVED">Approved</option>
-                        <option value="REJECTED">Rejected</option>
-                        <option value="CANCELLED">Cancelled</option>
-                    </select>
-                </div>
-
-                <!-- Reset Button -->
-                <div class="flex items-end">
-                    <button onclick="resetFilters()" class="w-full py-2 px-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-filter-circle-xmark text-xs"></i>
-                        <span>Reset Filters</span>
+                <div class="flex items-center gap-3">
+                    <button onclick="exportToCSV()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-semibold rounded-xl transition-all active:scale-95">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                        <span>Export Report</span>
+                    </button>
+                    <button onclick="openCreateModal()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-700 hover:bg-brand-800 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-sm shadow-brand-700/20 transition-all active:scale-95">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        <span>New Leave Request</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Date range secondary filter row -->
-            <div class="mt-4 pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Start Date From</label>
-                    <input type="date" id="filter-start-date" class="w-full py-1.5 px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600">
+            <!-- SUMMARY CARDS -->
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4" id="kpi-cards-container">
+                <!-- 1. Total Requests -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden" data-aos="fade-up" data-aos-delay="50">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Requests</span>
+                        <span class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600"><i data-lucide="folder-open" class="w-4 h-4"></i></span>
+                    </div>
+                    <div class="mt-3">
+                        <h3 class="text-2xl font-bold text-slate-900 kpi-value" id="kpi-total">0</h3>
+                        <p class="text-xs text-slate-400 mt-1">All recorded logs</p>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">End Date To</label>
-                    <input type="date" id="filter-end-date" class="w-full py-1.5 px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600">
-                </div>
-            </div>
-        </section>
 
-        <!-- Main Content Area: Table & Charts -->
-        <main class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Table Container (2 cols) -->
-            <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 shadow-sm flex flex-col overflow-hidden" data-aos="fade-up">
-                <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <!-- 2. Pending Requests -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden" data-aos="fade-up" data-aos-delay="100">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-amber-700">Pending</span>
+                        <span class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600"><i data-lucide="clock" class="w-4 h-4"></i></span>
+                    </div>
+                    <div class="mt-3">
+                        <h3 class="text-2xl font-bold text-slate-900 kpi-value" id="kpi-pending">0</h3>
+                        <p class="text-xs text-amber-600 font-medium mt-1">Awaiting approval</p>
+                    </div>
+                </div>
+
+                <!-- 3. Approved Requests -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden" data-aos="fade-up" data-aos-delay="150">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-brand-700">Approved</span>
+                        <span class="w-8 h-8 rounded-lg bg-brand-50 flex items-center justify-center text-brand-600"><i data-lucide="check-circle-2" class="w-4 h-4"></i></span>
+                    </div>
+                    <div class="mt-3">
+                        <h3 class="text-2xl font-bold text-slate-900 kpi-value" id="kpi-approved">0</h3>
+                        <p class="text-xs text-brand-600 font-medium mt-1">Cleared leaves</p>
+                    </div>
+                </div>
+
+                <!-- 4. Rejected Requests -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden" data-aos="fade-up" data-aos-delay="200">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-rose-700">Rejected</span>
+                        <span class="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center text-rose-600"><i data-lucide="x-circle" class="w-4 h-4"></i></span>
+                    </div>
+                    <div class="mt-3">
+                        <h3 class="text-2xl font-bold text-slate-900 kpi-value" id="kpi-rejected">0</h3>
+                        <p class="text-xs text-rose-600 font-medium mt-1">Disapproved logs</p>
+                    </div>
+                </div>
+
+                <!-- 5. Total Days Used -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden" data-aos="fade-up" data-aos-delay="250">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-600">Days Used</span>
+                        <span class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600"><i data-lucide="calendar-range" class="w-4 h-4"></i></span>
+                    </div>
+                    <div class="mt-3">
+                        <h3 class="text-2xl font-bold text-slate-900 kpi-value" id="kpi-days-used">0.00</h3>
+                        <p class="text-xs text-slate-400 mt-1">Allocated spent</p>
+                    </div>
+                </div>
+
+                <!-- 6. Total Remaining Days -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden" data-aos="fade-up" data-aos-delay="300">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-600">Remaining</span>
+                        <span class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600"><i data-lucide="pie-chart" class="w-4 h-4"></i></span>
+                    </div>
+                    <div class="mt-3">
+                        <h3 class="text-2xl font-bold text-slate-900 kpi-value" id="kpi-days-remaining">0.00</h3>
+                        <p class="text-xs text-slate-400 mt-1">Available pool</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ANALYTICS SECTION (TWO COLUMNS) -->
+            <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Left: Column Chart (Requests by Type) -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col" data-aos="fade-up">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-slate-900 text-sm">Leave Requests by Type</h3>
+                        <span class="text-xs text-slate-400">Distribution across active categories</span>
+                    </div>
+                    <div id="chart-requests-by-type" class="h-64 w-full flex-1"></div>
+                </div>
+
+                <!-- Right: Donut Chart (Requests Status) -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col" data-aos="fade-up" data-aos-delay="100">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-slate-900 text-sm">Leave Request Status</h3>
+                        <span class="text-xs text-slate-400">Workflow breakdown</span>
+                    </div>
+                    <div id="chart-requests-status" class="h-64 w-full flex-1"></div>
+                </div>
+            </section>
+
+            <!-- LEAVE UTILIZATION SECTION -->
+            <section class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm" data-aos="fade-up">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                     <div>
-                        <h2 class="font-bold text-slate-900">Leave Applications</h2>
-                        <p class="text-xs text-slate-500 mt-0.5" id="table-subtitle">Showing active page records</p>
+                        <h3 class="font-bold text-slate-900 text-sm">Leave Utilization Overview</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Comparative metrics for Allocated, Used, and Remaining Days</p>
                     </div>
                     <div class="flex items-center gap-2">
-                        <label class="text-xs text-slate-500 font-medium">Rows per page:</label>
-                        <select id="rows-per-page" onchange="changePageSize(this.value)" class="py-1 px-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20">
-                            <option value="10">10</option>
-                            <option value="25" selected>25</option>
-                            <option value="50">50</option>
+                        <label for="utilization-year-select" class="text-xs text-slate-500 font-medium">Calendar Year:</label>
+                        <select id="utilization-year-select" onchange="handleYearChange(this.value)" class="py-1 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                            <option value="2025" selected>2025</option>
+                            <option value="2026">2026</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="chart-leave-utilization" class="h-64 w-full"></div>
+            </section>
+
+            <!-- FILTERS SECTION -->
+            <section class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm" data-aos="fade-up">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+                    <!-- Search -->
+                    <div class="lg:col-span-2">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Search Employee</label>
+                        <div class="relative">
+                            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                            <input type="text" id="filter-search" placeholder="Name or Employee #..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600 transition-all">
+                        </div>
+                    </div>
+
+                    <!-- Leave Type -->
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Leave Type</label>
+                        <select id="filter-leave-type" class="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                            <option value="">All Types</option>
+                        </select>
+                    </div>
+
+                    <!-- Status -->
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Status</label>
+                        <select id="filter-status" class="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                            <option value="">All Statuses</option>
+                            <option value="PENDING">Pending</option>
+                            <option value="APPROVED">Approved</option>
+                            <option value="REJECTED">Rejected</option>
+                            <option value="CANCELLED">Cancelled</option>
+                        </select>
+                    </div>
+
+                    <!-- Department -->
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Department</label>
+                        <select id="filter-department" class="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                            <option value="">All Departments</option>
+                        </select>
+                    </div>
+
+                    <!-- Year -->
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Year</label>
+                        <select id="filter-year" class="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                            <option value="">All Years</option>
+                            <option value="2025" selected>2025</option>
+                            <option value="2026">2026</option>
                         </select>
                     </div>
                 </div>
 
-                <!-- Scrollable Table -->
-                <div class="flex-1 overflow-x-auto custom-scrollbar min-h-[400px] relative" id="table-wrapper">
-                    <!-- Skeleton Loader State -->
-                    <div id="table-skeleton" class="absolute inset-0 bg-white/80 z-10 p-6 space-y-4">
-                        <div class="h-8 bg-slate-100 rounded-lg animate-pulse w-full"></div>
-                        <div class="h-12 bg-slate-50 rounded-lg animate-pulse w-full"></div>
-                        <div class="h-12 bg-slate-50 rounded-lg animate-pulse w-full"></div>
-                        <div class="h-12 bg-slate-50 rounded-lg animate-pulse w-full"></div>
-                        <div class="h-12 bg-slate-50 rounded-lg animate-pulse w-full"></div>
+                <div class="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full sm:w-auto">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Start Date From</label>
+                            <input type="date" id="filter-start-date" class="w-full py-1.5 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">End Date To</label>
+                            <input type="date" id="filter-end-date" class="w-full py-1.5 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                        </div>
                     </div>
 
-                    <table class="w-full text-left text-sm border-collapse">
+                    <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                        <button onclick="resetFilters()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-xs rounded-xl transition-all flex items-center gap-1.5">
+                            <i data-lucide="filter-x" class="w-3.5 h-3.5"></i>
+                            <span>Reset</span>
+                        </button>
+                        <button onclick="applyFilters()" class="px-5 py-2 bg-brand-700 hover:bg-brand-800 text-white font-semibold text-xs rounded-xl transition-all shadow-sm flex items-center gap-1.5">
+                            <i data-lucide="filter" class="w-3.5 h-3.5"></i>
+                            <span>Apply Filters</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- LEAVE REQUESTS TABLE -->
+            <section class="bg-white rounded-2xl border border-slate-200/80 shadow-sm flex flex-col overflow-hidden" data-aos="fade-up">
+                <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50">
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-sm">Leave Requests Log</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Full audit trail of employee applications</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label for="rows-per-page" class="text-xs text-slate-500 font-medium">Page Size:</label>
+                        <select id="rows-per-page" onchange="changePageSize(this.value)" class="py-1 px-2 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                            <option value="10" selected>10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-x-auto custom-scrollbar min-h-[350px] relative">
+                    <!-- Loading Skeleton Overlay -->
+                    <div id="table-skeleton" class="absolute inset-0 bg-white/90 z-10 p-6 space-y-4 hidden">
+                        <div class="h-8 skeleton rounded-lg w-full"></div>
+                        <div class="h-10 skeleton rounded-lg w-full"></div>
+                        <div class="h-10 skeleton rounded-lg w-full"></div>
+                        <div class="h-10 skeleton rounded-lg w-full"></div>
+                        <div class="h-10 skeleton rounded-lg w-full"></div>
+                    </div>
+
+                    <table class="w-full text-left text-xs border-collapse">
                         <thead>
-                            <tr class="bg-slate-50 text-slate-500 text-xs font-semibold uppercase tracking-wider border-b border-slate-200/80">
-                                <th class="py-3.5 px-4">Employee</th>
-                                <th class="py-3.5 px-4">Type</th>
-                                <th class="py-3.5 px-4">Period</th>
-                                <th class="py-3.5 px-4 text-center">Days</th>
-                                <th class="py-3.5 px-4">Status</th>
-                                <th class="py-3.5 px-4 text-right">Actions</th>
+                            <tr class="bg-slate-50 text-slate-500 font-semibold uppercase tracking-wider border-b border-slate-200/80">
+                                <th class="py-3 px-4">Req Date</th>
+                                <th class="py-3 px-4">Employee</th>
+                                <th class="py-3 px-4">Emp #</th>
+                                <th class="py-3 px-4">Department</th>
+                                <th class="py-3 px-4">Leave Type</th>
+                                <th class="py-3 px-4">Start Date</th>
+                                <th class="py-3 px-4">End Date</th>
+                                <th class="py-3 px-4 text-center">Days</th>
+                                <th class="py-3 px-4">Status</th>
+                                <th class="py-3 px-4">Approved By</th>
+                                <th class="py-3 px-4 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="leave-table-body" class="divide-y divide-slate-100">
-                            <!-- Populated dynamically -->
+                            <!-- Dynamically Populated -->
                         </tbody>
                     </table>
 
                     <!-- Empty State -->
-                    <div id="empty-state" class="hidden py-16 text-center">
-                        <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-400 mb-3">
-                            <i class="fa-solid fa-folder-open text-2xl"></i>
+                    <div id="table-empty-state" class="hidden py-16 text-center">
+                        <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-400 mb-3">
+                            <i data-lucide="folder-open" class="w-6 h-6"></i>
                         </div>
-                        <h4 class="font-bold text-slate-800 text-base">No leave records found</h4>
-                        <p class="text-xs text-slate-500 max-w-xs mx-auto mt-1">There are no leave requests matching your filter criteria.</p>
+                        <h4 class="font-bold text-slate-800 text-sm">No leave requests found</h4>
+                        <p class="text-xs text-slate-500 max-w-xs mx-auto mt-1">Try changing your filters or create a new leave request.</p>
                     </div>
                 </div>
 
-                <!-- Server-Side Pagination Footer -->
+                <!-- Pagination Footer -->
                 <div class="p-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div class="text-xs text-slate-500">
                         Showing <span id="page-start" class="font-semibold text-slate-700">0</span> to <span id="page-end" class="font-semibold text-slate-700">0</span> of <span id="total-count" class="font-semibold text-slate-700">0</span> entries
                     </div>
                     <div class="flex items-center gap-1.5" id="pagination-controls">
-                        <button id="btn-prev" onclick="goToPage(state.currentPage - 1)" class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
-                            <i class="fa-solid fa-chevron-left mr-1"></i> Prev
+                        <button id="btn-prev" onclick="goToPage(state.currentPage - 1)" class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1">
+                            <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
+                            <span>Prev</span>
                         </button>
                         <div id="page-numbers" class="flex items-center gap-1"></div>
-                        <button id="btn-next" onclick="goToPage(state.currentPage + 1)" class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
-                            Next <i class="fa-solid fa-chevron-right ml-1"></i>
+                        <button id="btn-next" onclick="goToPage(state.currentPage + 1)" class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1">
+                            <span>Next</span>
+                            <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
                         </button>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Insights / Charts Side Panel (1 col) -->
-            <div class="space-y-6">
-                <!-- Chart 1: Status Distribution -->
-                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm" data-aos="fade-up">
-                    <h3 class="font-bold text-slate-900 text-sm mb-3 flex items-center justify-between">
-                        <span>Leave Status Distribution</span>
-                        <i class="fa-solid fa-chart-pie text-slate-400 text-xs"></i>
-                    </h3>
-                    <div id="chart-status" class="h-56 w-full"></div>
+            <!-- EMPLOYEE LEAVE BALANCES PANEL -->
+            <section class="bg-white rounded-2xl border border-slate-200/80 shadow-sm flex flex-col overflow-hidden" data-aos="fade-up">
+                <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50">
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-sm">Employee Leave Balances Summary</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Allocated and remaining days by employee and category</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="relative w-48 sm:w-64">
+                            <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                            <input type="text" id="balance-filter-search" oninput="debounce(loadLeaveBalances, 300)()" placeholder="Search employee..." class="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                        </div>
+                        <select id="balance-filter-dept" onchange="loadLeaveBalances()" class="py-1.5 px-3 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                            <option value="">All Departments</option>
+                        </select>
+                        <select id="balance-filter-year" onchange="loadLeaveBalances()" class="py-1.5 px-3 bg-white border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                            <option value="2025" selected>2025</option>
+                            <option value="2026">2026</option>
+                        </select>
+                    </div>
                 </div>
 
-                <!-- Chart 2: Leaves by Type -->
-                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm" data-aos="fade-up" data-aos-delay="100">
-                    <h3 class="font-bold text-slate-900 text-sm mb-3 flex items-center justify-between">
-                        <span>Leave Types Breakdown</span>
-                        <i class="fa-solid fa-chart-column text-slate-400 text-xs"></i>
-                    </h3>
-                    <div id="chart-types" class="h-56 w-full"></div>
+                <div class="flex-1 overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 font-semibold uppercase tracking-wider border-b border-slate-200/80">
+                                <th class="py-3 px-4">Employee</th>
+                                <th class="py-3 px-4">Emp #</th>
+                                <th class="py-3 px-4">Department</th>
+                                <th class="py-3 px-3 text-center">Vacation</th>
+                                <th class="py-3 px-3 text-center">Sick</th>
+                                <th class="py-3 px-3 text-center">Emergency</th>
+                                <th class="py-3 px-3 text-center">Special</th>
+                                <th class="py-3 px-3 text-center">Maternity</th>
+                                <th class="py-3 px-3 text-center">Paternity</th>
+                                <th class="py-3 px-3 text-center">Solo Parent</th>
+                                <th class="py-3 px-3 text-center">Other</th>
+                                <th class="py-3 px-4 text-center">Total Used</th>
+                                <th class="py-3 px-4 text-center">Total Remaining</th>
+                            </tr>
+                        </thead>
+                        <tbody id="balances-table-body" class="divide-y divide-slate-100">
+                            <!-- Dynamically Populated -->
+                        </tbody>
+                    </table>
                 </div>
-            </div>
+            </section>
+
         </main>
     </div>
 
-    <!-- CREATE / EDIT LEAVE MODAL -->
-    <div id="modal-leave-form" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-200">
-        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-lg w-full overflow-hidden transform scale-95 transition-transform duration-200" id="modal-leave-card">
-            <!-- Modal Header -->
+    <!-- NEW LEAVE REQUEST MODAL -->
+    <div id="modal-create-request" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-200">
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-lg w-full overflow-hidden transform scale-95 transition-transform duration-200" id="modal-create-card">
             <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <div>
-                    <h3 class="font-bold text-slate-900" id="modal-form-title">Add Leave Request</h3>
+                    <h3 class="font-bold text-slate-900">New Leave Request</h3>
                     <p class="text-xs text-slate-500">File an official employee leave schedule</p>
                 </div>
-                <button onclick="closeFormModal()" class="w-8 h-8 rounded-lg hover:bg-slate-200/60 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors">
-                    <i class="fa-solid fa-xmark"></i>
+                <button onclick="closeCreateModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
 
-            <!-- Form -->
-            <form id="leave-form" onsubmit="handleFormSubmit(event)" class="p-6 space-y-4">
-                <input type="hidden" id="form-leave-id">
-
-                <!-- Employee Selection -->
+            <form id="form-create-leave" onsubmit="handleCreateSubmit(event)" class="p-6 space-y-4">
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Employee <span class="text-rose-500">*</span></label>
-                    <select id="form-employee-id" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600">
+                    <select id="form-employee-id" required onchange="updateModalBalanceCheck()" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600">
                         <option value="">Select Employee...</option>
                     </select>
                 </div>
 
-                <!-- Leave Type -->
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Leave Type <span class="text-rose-500">*</span></label>
-                    <select id="form-leave-type" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600">
-                        <option value="">Select Type...</option>
-                        <option value="VACATION">Vacation Leave</option>
-                        <option value="SICK">Sick Leave</option>
-                        <option value="EMERGENCY">Emergency Leave</option>
-                        <option value="MATERNITY">Maternity Leave</option>
-                        <option value="PATERNITY">Paternity Leave</option>
-                        <option value="SOLO_PARENT">Solo Parent Leave</option>
-                        <option value="SPECIAL">Special Leave</option>
-                        <option value="OTHER">Other</option>
+                    <select id="form-leave-type-id" required onchange="updateModalBalanceCheck()" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600">
+                        <option value="">Select Active Leave Type...</option>
                     </select>
                 </div>
 
-                <!-- Dates Grid -->
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Start Date <span class="text-rose-500">*</span></label>
-                        <input type="date" id="form-start-date" required onchange="calculateDays()" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600">
+                        <input type="date" id="form-start-date" required onchange="calculateModalDays()" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">End Date <span class="text-rose-500">*</span></label>
-                        <input type="date" id="form-end-date" required onchange="calculateDays()" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600">
+                        <input type="date" id="form-end-date" required onchange="calculateModalDays()" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600">
                     </div>
                 </div>
 
-                <!-- Number of Days Display -->
-                <div class="p-3 bg-brand-50/50 rounded-xl border border-brand-100/80 flex items-center justify-between">
-                    <span class="text-xs font-medium text-brand-900">Total Computed Working Days:</span>
-                    <span class="text-sm font-bold text-brand-700" id="computed-days">0 Days</span>
+                <!-- Balance Calculation Box -->
+                <div id="modal-balance-box" class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-1">
+                    <div class="flex justify-between text-slate-600">
+                        <span>Available Balance:</span>
+                        <span id="modal-avail-bal" class="font-semibold">0.00 days</span>
+                    </div>
+                    <div class="flex justify-between text-slate-600">
+                        <span>Requested:</span>
+                        <span id="modal-req-days" class="font-semibold text-brand-700">0.00 days</span>
+                    </div>
+                    <div class="flex justify-between border-t border-slate-200 pt-1 font-bold text-slate-800">
+                        <span>Remaining After Request:</span>
+                        <span id="modal-rem-days">0.00 days</span>
+                    </div>
                 </div>
 
-                <!-- Reason -->
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Reason <span class="text-rose-500">*</span></label>
-                    <textarea id="form-reason" rows="3" required placeholder="Provide detail regarding the leave request..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600 resize-none"></textarea>
+                    <textarea id="form-reason" rows="3" required placeholder="Provide detail regarding the leave request..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600 resize-none"></textarea>
                 </div>
 
-                <!-- Form Actions -->
                 <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
-                    <button type="button" onclick="closeFormModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm rounded-xl transition-all">Cancel</button>
-                    <button type="submit" id="btn-save-leave" class="px-5 py-2 bg-brand-700 hover:bg-brand-800 text-white font-semibold text-sm rounded-xl shadow-sm transition-all flex items-center gap-2">
-                        <i class="fa-solid fa-floppy-disk text-xs"></i>
-                        <span>Save Request</span>
+                    <button type="button" onclick="closeCreateModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-all">Cancel</button>
+                    <button type="submit" id="btn-submit-leave" class="px-5 py-2 bg-brand-700 hover:bg-brand-800 text-white font-semibold text-xs rounded-xl shadow-sm transition-all flex items-center gap-1.5">
+                        <i data-lucide="check" class="w-4 h-4"></i>
+                        <span>Submit Request</span>
                     </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- DETAIL / WORKFLOW VIEW MODAL -->
+    <!-- REQUEST DETAILS MODAL -->
     <div id="modal-detail" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-200">
         <div class="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-lg w-full overflow-hidden transform scale-95 transition-transform duration-200" id="modal-detail-card">
             <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <div>
                     <h3 class="font-bold text-slate-900">Leave Application Details</h3>
-                    <p class="text-xs text-slate-500">Full audit information & action log</p>
+                    <p class="text-xs text-slate-500">Audit & workflow information</p>
                 </div>
-                <button onclick="closeDetailModal()" class="w-8 h-8 rounded-lg hover:bg-slate-200/60 flex items-center justify-center text-slate-400 hover:text-slate-600">
-                    <i class="fa-solid fa-xmark"></i>
+                <button onclick="closeDetailModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
 
-            <div class="p-6 space-y-4" id="detail-modal-body">
+            <div class="p-6 space-y-4" id="detail-modal-content">
                 <!-- Dynamically populated -->
             </div>
 
-            <div id="detail-actions" class="p-4 border-t border-slate-100 bg-slate-50/50 flex items-center justify-end gap-2">
-                <!-- Dynamic approval buttons based on status -->
+            <div id="detail-modal-actions" class="p-4 border-t border-slate-100 bg-slate-50/50 flex items-center justify-end gap-2">
+                <!-- Dynamic approval buttons -->
             </div>
         </div>
     </div>
 
-    <!-- APPROVAL / REJECTION CONFIRMATION MODAL -->
-    <div id="modal-confirm" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-200">
+    <!-- REJECTION REASON MODAL -->
+    <div id="modal-reject" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-200">
         <div class="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-md w-full p-6 text-center">
-            <div id="confirm-icon-wrapper" class="w-12 h-12 rounded-full mx-auto flex items-center justify-center mb-4"></div>
-            <h3 class="text-lg font-bold text-slate-900" id="confirm-title">Confirm Action</h3>
-            <p class="text-sm text-slate-500 mt-1" id="confirm-description">Are you sure you want to proceed with this operation?</p>
+            <div class="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="x-circle" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-900">Reject Leave Request</h3>
+            <p class="text-xs text-slate-500 mt-1">Please provide a clear justification for disapproving this leave request.</p>
 
-            <div id="rejection-reason-container" class="hidden mt-4 text-left">
+            <div class="mt-4 text-left">
                 <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Rejection Reason <span class="text-rose-500">*</span></label>
-                <textarea id="confirm-rejection-reason" rows="2" placeholder="Explain why this request is being rejected..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500"></textarea>
+                <textarea id="reject-reason-input" rows="3" placeholder="Reason for rejection..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 resize-none"></textarea>
             </div>
 
-            <div class="mt-6 flex items-center justify-center gap-3">
-                <button onclick="closeConfirmModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm rounded-xl transition-all">Cancel</button>
-                <button id="btn-confirm-submit" class="px-5 py-2 text-white font-semibold text-sm rounded-xl shadow-sm transition-all">Confirm</button>
+            <div class="mt-6 flex items-center justify-end gap-3">
+                <button onclick="closeRejectModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl">Cancel</button>
+                <button onclick="executeReject()" class="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs rounded-xl shadow-sm">Confirm Rejection</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EMPLOYEE BALANCE DETAIL DRAWER MODAL -->
+    <div id="modal-employee-balances" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-200">
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-2xl w-full overflow-hidden transform scale-95 transition-transform duration-200" id="modal-employee-balances-card">
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <div class="flex items-center gap-3">
+                    <div id="emp-bal-avatar" class="w-10 h-10 rounded-full bg-brand-100 text-brand-800 font-bold flex items-center justify-center text-sm">
+                        --
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-900" id="emp-bal-name">Employee Name</h3>
+                        <p class="text-xs text-slate-500" id="emp-bal-sub">Emp # • Department</p>
+                    </div>
+                </div>
+                <button onclick="closeEmpBalancesModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="p-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="emp-bal-cards-grid">
+                    <!-- Dynamically populated category cards -->
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-slate-100 bg-slate-50/50 flex justify-end">
+                <button onclick="closeEmpBalancesModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl">Close</button>
             </div>
         </div>
     </div>
 
     <!-- APPLICATION SCRIPT LOGIC -->
     <script>
-        //------------------------------------------------------------------
-        // 1. CONFIGURATION & CONSTANTS
-        //------------------------------------------------------------------
+        //==================================================
+        // 1. CONFIGURATION
+        //==================================================
         const SUPABASE_URL = 'https://trockfedsoekzdhumpba.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_5I1FFmkfKxUvOyqOH6ZkZw_oHE8vb1a';
         const TIMEZONE = 'Asia/Manila';
 
-        //------------------------------------------------------------------
+        //==================================================
         // 2. SUPABASE INITIALIZATION
-        //------------------------------------------------------------------
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        //==================================================
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        //------------------------------------------------------------------
-        // 3. GLOBAL STATE MANAGEMENT
-        //------------------------------------------------------------------
+        //==================================================
+        // 3. GLOBAL STATE
+        //==================================================
         const state = {
+            currentUser: null,
+            currentEmployee: null,
             currentPage: 1,
-            pageSize: 25,
+            pageSize: 10,
             totalRecords: 0,
-            leaveTableTarget: 'leaves',
             filters: {
                 search: '',
-                departmentId: '',
-                type: '',
+                leaveTypeId: '',
                 status: '',
+                departmentId: '',
+                year: '2025',
                 startDate: '',
                 endDate: ''
             },
-            employees: [],
+            leaveTypes: [],
             departments: [],
-            currentData: [],
-            pendingAction: null
+            employees: [],
+            currentRequests: [],
+            currentBalances: [],
+            pendingActionId: null
         };
 
-        //------------------------------------------------------------------
-        // 4. DOM REFERENCES
-        //------------------------------------------------------------------
-        const DOM = {
-            leaveTableBody: document.getElementById('leave-table-body'),
-            tableSkeleton: document.getElementById('table-skeleton'),
-            emptyState: document.getElementById('empty-state'),
-            pageStart: document.getElementById('page-start'),
-            pageEnd: document.getElementById('page-end'),
-            totalCount: document.getElementById('total-count'),
-            pageNumbers: document.getElementById('page-numbers'),
-            btnPrev: document.getElementById('btn-prev'),
-            btnNext: document.getElementById('btn-next'),
-            filterSearch: document.getElementById('filter-search'),
-            filterDept: document.getElementById('filter-department'),
-            filterType: document.getElementById('filter-type'),
-            filterStatus: document.getElementById('filter-status'),
-            filterStart: document.getElementById('filter-start-date'),
-            filterEnd: document.getElementById('filter-end-date'),
-            // Modal DOMs
-            modalForm: document.getElementById('modal-leave-form'),
-            modalFormCard: document.getElementById('modal-leave-card'),
-            modalDetail: document.getElementById('modal-detail'),
-            modalDetailCard: document.getElementById('modal-detail-card'),
-            modalConfirm: document.getElementById('modal-confirm'),
-            // Forms
-            leaveForm: document.getElementById('leave-form'),
-            formLeaveId: document.getElementById('form-leave-id'),
-            formEmployeeId: document.getElementById('form-employee-id'),
-            formLeaveType: document.getElementById('form-leave-type'),
-            formStartDate: document.getElementById('form-start-date'),
-            formEndDate: document.getElementById('form-end-date'),
-            formReason: document.getElementById('form-reason'),
-            computedDays: document.getElementById('computed-days')
-        };
-
-        //------------------------------------------------------------------
-        // 5. UTILITY FUNCTIONS
-        //------------------------------------------------------------------
-        function formatPHTDate(dateStr) {
+        //==================================================
+        // 4. UTILITY FUNCTIONS
+        //==================================================
+        function formatPHDate(dateStr) {
             if (!dateStr) return 'N/A';
             const date = new Date(dateStr);
             return new Intl.DateTimeFormat('en-PH', {
@@ -561,7 +783,7 @@
             }).format(date);
         }
 
-        function formatPHTDateTime(dateStr) {
+        function formatPHDateTime(dateStr) {
             if (!dateStr) return 'N/A';
             const date = new Date(dateStr);
             return new Intl.DateTimeFormat('en-PH', {
@@ -575,90 +797,120 @@
             }).format(date);
         }
 
+        function updateHeaderDateTime() {
+            const now = new Date();
+            const str = new Intl.DateTimeFormat('en-PH', {
+                timeZone: TIMEZONE,
+                weekday: 'short',
+                month: 'short',
+                day: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            }).format(now);
+            const el = document.getElementById('header-ph-datetime');
+            if (el) el.textContent = `${str} (PHT)`;
+        }
+
         function getStatusBadge(status) {
             const map = {
-                'PENDING': '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200/80"><i class="fa-solid fa-clock text-[10px]"></i> Pending</span>',
-                'APPROVED': '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-50 text-brand-700 border border-brand-200/80"><i class="fa-solid fa-circle-check text-[10px]"></i> Approved</span>',
-                'REJECTED': '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200/80"><i class="fa-solid fa-circle-xmark text-[10px]"></i> Rejected</span>',
-                'CANCELLED': '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200"><i class="fa-solid fa-ban text-[10px]"></i> Cancelled</span>'
+                'PENDING': '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200/80"><i data-lucide="clock" class="w-3 h-3"></i> Pending</span>',
+                'APPROVED': '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-brand-50 text-brand-700 border border-brand-200/80"><i data-lucide="check-circle-2" class="w-3 h-3"></i> Approved</span>',
+                'REJECTED': '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200/80"><i data-lucide="x-circle" class="w-3 h-3"></i> Rejected</span>',
+                'CANCELLED': '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600 border border-slate-200"><i data-lucide="ban" class="w-3 h-3"></i> Cancelled</span>'
             };
             return map[status] || status;
         }
 
-        function showToast(type, message) {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            
-            const styles = {
-                success: 'bg-brand-900 text-white border-brand-700',
-                error: 'bg-rose-900 text-white border-rose-700',
-                warning: 'bg-amber-900 text-white border-amber-700',
-                info: 'bg-slate-900 text-white border-slate-700'
+        function getInitials(fullName) {
+            if (!fullName) return 'EM';
+            return fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
             };
-
-            const icons = {
-                success: 'fa-circle-check text-brand-400',
-                error: 'fa-triangle-exclamation text-rose-400',
-                warning: 'fa-circle-exclamation text-amber-400',
-                info: 'fa-circle-info text-blue-400'
-            };
-
-            toast.className = `pointer-events-auto flex items-center gap-3 p-4 rounded-xl border shadow-lg text-sm transition-all duration-300 transform translate-y-2 opacity-0 ${styles[type] || styles.info}`;
-            toast.innerHTML = `
-                <i class="fa-solid ${icons[type] || icons.info} text-base"></i>
-                <span class="flex-1 font-medium">${message}</span>
-                <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            `;
-
-            container.appendChild(toast);
-            gsap.to(toast, { y: 0, opacity: 1, duration: 0.3 });
-
-            setTimeout(() => {
-                gsap.to(toast, { y: -10, opacity: 0, duration: 0.3, onComplete: () => toast.remove() });
-            }, 4000);
         }
 
-        function calculateDays() {
-            const start = DOM.formStartDate.value;
-            const end = DOM.formEndDate.value;
-            if (!start || !end) {
-                DOM.computedDays.textContent = '0 Days';
-                return 0;
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            sidebar.classList.toggle('-translate-x-full');
+            backdrop.classList.toggle('hidden');
+        }
+
+        //==================================================
+        // 5. AUTHENTICATION
+        //==================================================
+        async function initAuth() {
+            try {
+                const { data: { user }, error } = await supabase.auth.getUser();
+                if (error || !user) {
+                    console.log("No authenticated user found or session expired.");
+                } else {
+                    state.currentUser = user;
+                    const { data: emp } = await supabase
+                        .from('employees')
+                        .select('id, full_name, personal_email, avatar_url')
+                        .eq('auth_user_id', user.id)
+                        .maybeSingle();
+
+                    if (emp) {
+                        state.currentEmployee = emp;
+                        document.getElementById('sidebar-user-name').textContent = emp.full_name;
+                        document.getElementById('sidebar-user-email').textContent = emp.personal_email || user.email;
+                        const initials = getInitials(emp.full_name);
+                        document.getElementById('sidebar-user-avatar').textContent = initials;
+                        document.getElementById('top-user-avatar').textContent = initials;
+                    }
+                }
+            } catch (err) {
+                console.error("Auth init exception:", err);
             }
-            const dtStart = new Date(start);
-            const dtEnd = new Date(end);
-            if (dtEnd < dtStart) {
-                DOM.computedDays.textContent = 'Invalid date range';
-                return 0;
-            }
-            const diffTime = Math.abs(dtEnd - dtStart);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-            DOM.computedDays.textContent = `${diffDays} Day${diffDays > 1 ? 's' : ''}`;
-            return diffDays;
         }
 
-        //------------------------------------------------------------------
-        // 6. DATA LOADING & INITIALIZATION
-        //------------------------------------------------------------------
-        async function initPage() {
-            AOS.init({ duration: 600, once: true });
-            await loadDepartments();
-            await loadEmployees();
-            await verifyLeaveTableTarget();
-            await refreshAllData();
-            setupDebouncedFilters();
+        async function handleLogout() {
+            await supabase.auth.signOut();
+            showToast("Logged out successfully", "info");
+            setTimeout(() => window.location.reload(), 1000);
         }
 
-        async function verifyLeaveTableTarget() {
-            const { error } = await supabaseClient.from('leaves').select('id').limit(1);
-            if (error && error.message.includes('does not exist')) {
-                state.leaveTableTarget = 'leave_requests';
+        //==================================================
+        // 6. DATA LOADING
+        //==================================================
+        async function loadLeaveTypes() {
+            try {
+                const { data, error } = await supabase
+                    .from('leave_types')
+                    .select('*')
+                    .order('leave_name');
+
+                if (error) throw error;
+                state.leaveTypes = data || [];
+
+                // Populate filter dropdown
+                const filterSelect = document.getElementById('filter-leave-type');
+                filterSelect.innerHTML = '<option value="">All Types</option>' + 
+                    state.leaveTypes.map(t => `<option value="${t.id}">${t.leave_name} (${t.leave_code})</option>`).join('');
+
+                // Populate form dropdown (is_active = true)
+                const formSelect = document.getElementById('form-leave-type-id');
+                formSelect.innerHTML = '<option value="">Select Active Leave Type...</option>' + 
+                    state.leaveTypes.filter(t => t.is_active).map(t => `<option value="${t.id}">${t.leave_name} (${t.leave_code})</option>`).join('');
+            } catch (err) {
+                console.error("Error loading leave types:", err);
+                showToast("Unable to load leave types.", "error");
             }
         }
 
         async function loadDepartments() {
             try {
-                const { data, error } = await supabaseClient
+                const { data, error } = await supabase
                     .from('departments')
                     .select('id, department_name, department_code')
                     .eq('is_active', true)
@@ -667,16 +919,20 @@
                 if (error) throw error;
                 state.departments = data || [];
 
-                DOM.filterDept.innerHTML = '<option value="">All Departments</option>' + 
+                const options = '<option value="">All Departments</option>' + 
                     state.departments.map(d => `<option value="${d.id}">${d.department_name}</option>`).join('');
+
+                document.getElementById('filter-department').innerHTML = options;
+                document.getElementById('balance-filter-dept').innerHTML = options;
             } catch (err) {
-                console.error("Failed to load departments:", err);
+                console.error("Error loading departments:", err);
+                showToast("Unable to load departments.", "error");
             }
         }
 
-        async function loadEmployees() {
+        async function loadEmployeeOptions() {
             try {
-                const { data, error } = await supabaseClient
+                const { data, error } = await supabase
                     .from('employees')
                     .select('id, full_name, employee_number, department_id')
                     .order('full_name');
@@ -684,44 +940,36 @@
                 if (error) throw error;
                 state.employees = data || [];
 
-                DOM.formEmployeeId.innerHTML = '<option value="">Select Employee...</option>' + 
+                const formSelect = document.getElementById('form-employee-id');
+                formSelect.innerHTML = '<option value="">Select Employee...</option>' + 
                     state.employees.map(e => `<option value="${e.id}">${e.full_name} (${e.employee_number})</option>`).join('');
             } catch (err) {
-                console.error("Failed to load employees:", err);
+                console.error("Error loading employee options:", err);
+                showToast("Unable to load employee list.", "error");
             }
         }
 
-        async function refreshAllData() {
-            const refreshIcon = document.getElementById('refresh-icon');
-            if (refreshIcon) gsap.to(refreshIcon, { rotate: 360, duration: 0.8, ease: "power2.inOut" });
+        async function loadLeaveRequests() {
+            const skeleton = document.getElementById('table-skeleton');
+            const emptyState = document.getElementById('table-empty-state');
+            const tableBody = document.getElementById('leave-table-body');
 
-            await Promise.all([
-                fetchLeaveRequests(),
-                fetchStatistics()
-            ]);
-        }
-
-        async function fetchLeaveRequests() {
-            DOM.tableSkeleton.classList.remove('hidden');
-            DOM.emptyState.classList.add('hidden');
+            skeleton.classList.remove('hidden');
+            emptyState.classList.add('hidden');
 
             try {
-                let query = supabaseClient
-                    .from(state.leaveTableTarget)
+                let query = supabase
+                    .from('leave_requests')
                     .select(`
                         *,
-                        employees!inner(
-                            id,
-                            full_name,
-                            employee_number,
-                            avatar_url,
-                            department_id,
-                            departments(department_name)
-                        )
+                        employees!leave_requests_employee_id_fkey(id, full_name, employee_number, avatar_url, department_id, departments(department_name)),
+                        leave_types!leave_requests_leave_type_id_fkey(id, leave_name, leave_code),
+                        approver:employees!leave_requests_approved_by_fkey(id, full_name)
                     `, { count: 'exact' });
 
-                if (state.filters.type) {
-                    query = query.eq('leave_type', state.filters.type);
+                // Filters
+                if (state.filters.leaveTypeId) {
+                    query = query.eq('leave_type_id', state.filters.leaveTypeId);
                 }
                 if (state.filters.status) {
                     query = query.eq('status', state.filters.status);
@@ -734,6 +982,10 @@
                 }
                 if (state.filters.endDate) {
                     query = query.lte('end_date', state.filters.endDate);
+                }
+                if (state.filters.year) {
+                    const y = parseInt(state.filters.year, 10);
+                    query = query.gte('start_date', `${y}-01-01`).lte('start_date', `${y}-12-31`);
                 }
                 if (state.filters.search) {
                     const search = `%${state.filters.search}%`;
@@ -748,184 +1000,288 @@
                 const { data, count, error } = await query;
                 if (error) throw error;
 
-                state.currentData = data || [];
+                state.currentRequests = data || [];
                 state.totalRecords = count || 0;
 
                 renderTable();
                 renderPagination();
             } catch (err) {
-                console.error("Fetch leave requests error:", err);
-                showToast('error', 'Failed to retrieve leave applications');
+                console.error("Error loading leave requests:", err);
+                showToast("Unable to load leave requests.", "error");
             } finally {
-                DOM.tableSkeleton.classList.add('hidden');
+                skeleton.classList.add('hidden');
             }
         }
 
-        //------------------------------------------------------------------
-        // 7. STATISTICS & CHARTS
-        //------------------------------------------------------------------
-        async function fetchStatistics() {
+        //==================================================
+        // 7. SUMMARY & KPI
+        //==================================================
+        async function loadSummary() {
             try {
-                const { data, error } = await supabaseClient
-                    .from(state.leaveTableTarget)
-                    .select('status, leave_type');
+                const year = state.filters.year || '2025';
+                const y = parseInt(year, 10);
 
-                if (error) throw error;
+                // 1. Fetch Request Status Counts
+                const { data: requests, error: reqErr } = await supabase
+                    .from('leave_requests')
+                    .select('status, number_of_days, start_date')
+                    .gte('start_date', `${y}-01-01`)
+                    .lte('start_date', `${y}-12-31`);
 
-                const counts = {
-                    total: data.length,
-                    PENDING: 0,
-                    APPROVED: 0,
-                    REJECTED: 0,
-                    CANCELLED: 0
-                };
+                if (reqErr) throw reqErr;
 
-                const typeCounts = {};
-
-                data.forEach(item => {
-                    if (counts[item.status] !== undefined) counts[item.status]++;
-                    typeCounts[item.leave_type] = (typeCounts[item.leave_type] || 0) + 1;
+                let total = requests.length;
+                let pending = 0, approved = 0, rejected = 0;
+                requests.forEach(r => {
+                    if (r.status === 'PENDING') pending++;
+                    if (r.status === 'APPROVED') approved++;
+                    if (r.status === 'REJECTED') rejected++;
                 });
 
-                document.getElementById('kpi-total').textContent = counts.total;
-                document.getElementById('kpi-pending').textContent = counts.PENDING;
-                document.getElementById('kpi-approved').textContent = counts.APPROVED;
-                document.getElementById('kpi-rejected').textContent = counts.REJECTED;
-                document.getElementById('kpi-cancelled').textContent = counts.CANCELLED;
+                // 2. Fetch Leave Balance Totals for Year
+                const { data: balances, error: balErr } = await supabase
+                    .from('employee_leave_balances')
+                    .select('used_days, remaining_days')
+                    .eq('calendar_year', y);
 
-                renderCharts(counts, typeCounts);
+                if (balErr) throw balErr;
+
+                let daysUsed = 0;
+                let daysRemaining = 0;
+                balances.forEach(b => {
+                    daysUsed += Number(b.used_days || 0);
+                    daysRemaining += Number(b.remaining_days || 0);
+                });
+
+                // GSAP Number Counter Animations
+                animateValue('kpi-total', total, false);
+                animateValue('kpi-pending', pending, false);
+                animateValue('kpi-approved', approved, false);
+                animateValue('kpi-rejected', rejected, false);
+                animateValue('kpi-days-used', daysUsed, true);
+                animateValue('kpi-days-remaining', daysRemaining, true);
+
             } catch (err) {
-                console.error("Fetch statistics error:", err);
+                console.error("Error loading summary KPIs:", err);
             }
         }
 
-        function renderCharts(statusCounts, typeCounts) {
-            Highcharts.chart('chart-status', {
-                chart: { type: 'pie', backgroundColor: 'transparent' },
-                title: { text: null },
-                credits: { enabled: false },
-                plotOptions: {
-                    pie: {
-                        innerSize: '65%',
-                        dataLabels: { enabled: false },
-                        showInLegend: true
-                    }
-                },
-                series: [{
-                    name: 'Requests',
-                    data: [
-                        { name: 'Pending', y: statusCounts.PENDING, color: '#f59e0b' },
-                        { name: 'Approved', y: statusCounts.APPROVED, color: '#16a34a' },
-                        { name: 'Rejected', y: statusCounts.REJECTED, color: '#f43f5e' },
-                        { name: 'Cancelled', y: statusCounts.CANCELLED, color: '#64748b' }
-                    ]
-                }]
-            });
+        function animateValue(id, endValue, isFloat = false) {
+            const obj = { val: 0 };
+            const el = document.getElementById(id);
+            if (!el) return;
 
-            const typeSeries = Object.keys(typeCounts).map(k => ({ name: k, y: typeCounts[k] }));
-            Highcharts.chart('chart-types', {
-                chart: { type: 'column', backgroundColor: 'transparent' },
-                title: { text: null },
-                credits: { enabled: false },
-                xAxis: { type: 'category', labels: { style: { fontSize: '10px' } } },
-                yAxis: { title: { text: null }, allowDecimals: false },
-                legend: { enabled: false },
-                series: [{
-                    name: 'Count',
-                    color: '#15803d',
-                    data: typeSeries
-                }]
+            gsap.to(obj, {
+                val: endValue,
+                duration: 1,
+                ease: "power2.out",
+                onUpdate: () => {
+                    el.textContent = isFloat ? obj.val.toFixed(2) : Math.floor(obj.val).toLocaleString();
+                }
             });
         }
 
-        //------------------------------------------------------------------
-        // 8. TABLE RENDER & PAGINATION
-        //------------------------------------------------------------------
-        function renderTable() {
-            DOM.leaveTableBody.innerHTML = '';
+        //==================================================
+        // 8. CHARTS (HIGHCHARTS ONLY)
+        //==================================================
+        async function loadChartData() {
+            try {
+                const year = parseInt(state.filters.year || '2025', 10);
 
-            if (state.currentData.length === 0) {
-                DOM.emptyState.classList.remove('hidden');
+                // Fetch Requests with Leave Types for Year
+                const { data: requests, error: reqErr } = await supabase
+                    .from('leave_requests')
+                    .select('status, leave_types(leave_name)')
+                    .gte('start_date', `${year}-01-01`)
+                    .lte('start_date', `${year}-12-31`);
+
+                if (reqErr) throw reqErr;
+
+                // Process Requests by Type
+                const typeCounts = {};
+                const statusCounts = { APPROVED: 0, PENDING: 0, REJECTED: 0, CANCELLED: 0 };
+
+                requests.forEach(r => {
+                    const tName = r.leave_types?.leave_name || 'Other';
+                    typeCounts[tName] = (typeCounts[tName] || 0) + 1;
+                    if (statusCounts[r.status] !== undefined) {
+                        statusCounts[r.status]++;
+                    }
+                });
+
+                // Render Chart 1: Requests by Type
+                Highcharts.chart('chart-requests-by-type', {
+                    chart: { type: 'column', backgroundColor: 'transparent' },
+                    title: { text: null },
+                    credits: { enabled: false },
+                    xAxis: {
+                        categories: Object.keys(typeCounts),
+                        labels: { style: { fontSize: '10px', color: '#64748b' } }
+                    },
+                    yAxis: { title: { text: null }, allowDecimals: false },
+                    legend: { enabled: false },
+                    series: [{
+                        name: 'Requests',
+                        color: '#15803d',
+                        data: Object.values(typeCounts)
+                    }]
+                });
+
+                // Render Chart 2: Requests Status
+                Highcharts.chart('chart-requests-status', {
+                    chart: { type: 'pie', backgroundColor: 'transparent' },
+                    title: { text: null },
+                    credits: { enabled: false },
+                    plotOptions: {
+                        pie: {
+                            innerSize: '65%',
+                            dataLabels: { enabled: false },
+                            showInLegend: true
+                        }
+                    },
+                    legend: { itemStyle: { fontSize: '11px', color: '#64748b' } },
+                    series: [{
+                        name: 'Requests',
+                        data: [
+                            { name: 'Approved', y: statusCounts.APPROVED, color: '#16a34a' },
+                            { name: 'Pending', y: statusCounts.PENDING, color: '#f59e0b' },
+                            { name: 'Rejected', y: statusCounts.REJECTED, color: '#f43f5e' },
+                            { name: 'Cancelled', y: statusCounts.CANCELLED, color: '#64748b' }
+                        ]
+                    }]
+                });
+
+                // Render Chart 3: Leave Utilization
+                const { data: balances, error: balErr } = await supabase
+                    .from('employee_leave_balances')
+                    .select('allocated_days, used_days, remaining_days')
+                    .eq('calendar_year', year);
+
+                if (balErr) throw balErr;
+
+                let totAlloc = 0, totUsed = 0, totRem = 0;
+                balances.forEach(b => {
+                    totAlloc += Number(b.allocated_days || 0);
+                    totUsed += Number(b.used_days || 0);
+                    totRem += Number(b.remaining_days || 0);
+                });
+
+                Highcharts.chart('chart-leave-utilization', {
+                    chart: { type: 'bar', backgroundColor: 'transparent' },
+                    title: { text: null },
+                    credits: { enabled: false },
+                    xAxis: { categories: ['Allocated Days', 'Used Days', 'Remaining Days'] },
+                    yAxis: { title: { text: 'Days' } },
+                    legend: { enabled: false },
+                    series: [{
+                        name: 'Total Days',
+                        data: [
+                            { y: totAlloc, color: '#3b82f6' },
+                            { y: totUsed, color: '#eab308' },
+                            { y: totRem, color: '#22c55e' }
+                        ]
+                    }]
+                });
+
+            } catch (err) {
+                console.error("Error loading chart data:", err);
+            }
+        }
+
+        function handleYearChange(year) {
+            state.filters.year = year;
+            loadSummary();
+            loadChartData();
+            loadLeaveRequests();
+        }
+
+        //==================================================
+        // 9. PAGINATION & TABLE RENDER
+        //==================================================
+        function renderTable() {
+            const tableBody = document.getElementById('leave-table-body');
+            const emptyState = document.getElementById('table-empty-state');
+            tableBody.innerHTML = '';
+
+            if (state.currentRequests.length === 0) {
+                emptyState.classList.remove('hidden');
                 return;
             }
 
-            state.currentData.forEach(row => {
+            state.currentRequests.forEach(row => {
                 const emp = row.employees || {};
-                const deptName = emp.departments?.department_name || 'Unassigned';
-                const initials = emp.full_name ? emp.full_name.split(' ').map(n => n[0]).join('').substring(0, 2) : 'EM';
+                const lType = row.leave_types || {};
+                const dept = emp.departments?.department_name || 'Unassigned';
+                const approver = row.approver?.full_name || '--';
+                const initials = getInitials(emp.full_name);
 
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-50/80 transition-colors duration-150';
                 tr.innerHTML = `
-                    <td class="py-3.5 px-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-full bg-brand-100 border border-brand-200 flex items-center justify-center font-bold text-brand-800 text-xs flex-shrink-0">
+                    <td class="py-3 px-4 text-slate-500 whitespace-nowrap">${formatPHDate(row.created_at)}</td>
+                    <td class="py-3 px-4">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-7 h-7 rounded-full bg-brand-100 text-brand-800 font-bold flex items-center justify-center text-[10px] flex-shrink-0">
                                 ${initials}
                             </div>
-                            <div>
-                                <div class="font-semibold text-slate-900">${emp.full_name || 'N/A'}</div>
-                                <div class="text-xs text-slate-400 flex items-center gap-2">
-                                    <span>${emp.employee_number || ''}</span>
-                                    <span>•</span>
-                                    <span>${deptName}</span>
-                                </div>
-                            </div>
+                            <span class="font-semibold text-slate-900">${emp.full_name || 'N/A'}</span>
                         </div>
                     </td>
-                    <td class="py-3.5 px-4 font-medium text-slate-700 text-xs">
-                        <span class="px-2 py-0.5 rounded bg-slate-100 border border-slate-200">${row.leave_type}</span>
-                    </td>
-                    <td class="py-3.5 px-4 text-xs text-slate-600">
-                        ${formatPHTDate(row.start_date)} - ${formatPHTDate(row.end_date)}
-                    </td>
-                    <td class="py-3.5 px-4 text-center font-semibold text-slate-800 text-xs">
-                        ${row.number_of_days || '--'}
-                    </td>
-                    <td class="py-3.5 px-4">
-                        ${getStatusBadge(row.status)}
-                    </td>
-                    <td class="py-3.5 px-4 text-right">
+                    <td class="py-3 px-4 text-slate-600 font-medium">${emp.employee_number || 'N/A'}</td>
+                    <td class="py-3 px-4 text-slate-600">${dept}</td>
+                    <td class="py-3 px-4"><span class="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 font-medium text-slate-700">${lType.leave_name || 'N/A'}</span></td>
+                    <td class="py-3 px-4 text-slate-600 whitespace-nowrap">${formatPHDate(row.start_date)}</td>
+                    <td class="py-3 px-4 text-slate-600 whitespace-nowrap">${formatPHDate(row.end_date)}</td>
+                    <td class="py-3 px-4 text-center font-bold text-slate-800">${Number(row.number_of_days || 0).toFixed(1)}</td>
+                    <td class="py-3 px-4">${getStatusBadge(row.status)}</td>
+                    <td class="py-3 px-4 text-slate-600">${approver}</td>
+                    <td class="py-3 px-4 text-right">
                         <div class="flex items-center justify-end gap-1">
-                            <button onclick="openDetailModal('${row.id}')" title="View details" class="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors">
-                                <i class="fa-solid fa-eye text-xs"></i>
+                            <button onclick="openDetailModal('${row.id}')" title="View details" class="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
                             </button>
                             ${row.status === 'PENDING' ? `
-                                <button onclick="promptStatusUpdate('${row.id}', 'APPROVED')" title="Approve" class="p-1.5 text-brand-600 hover:text-brand-800 rounded-lg hover:bg-brand-50 transition-colors">
-                                    <i class="fa-solid fa-check text-xs"></i>
+                                <button onclick="approveRequest('${row.id}')" title="Approve" class="p-1.5 text-brand-600 hover:text-brand-800 rounded-lg hover:bg-brand-50">
+                                    <i data-lucide="check" class="w-4 h-4"></i>
                                 </button>
-                                <button onclick="promptStatusUpdate('${row.id}', 'REJECTED')" title="Reject" class="p-1.5 text-rose-500 hover:text-rose-700 rounded-lg hover:bg-rose-50 transition-colors">
-                                    <i class="fa-solid fa-xmark text-xs"></i>
+                                <button onclick="openRejectModal('${row.id}')" title="Reject" class="p-1.5 text-rose-500 hover:text-rose-700 rounded-lg hover:bg-rose-50">
+                                    <i data-lucide="x" class="w-4 h-4"></i>
                                 </button>
                             ` : ''}
-                            <button onclick="deleteRecord('${row.id}')" title="Delete record" class="p-1.5 text-slate-300 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors">
-                                <i class="fa-solid fa-trash-can text-xs"></i>
-                            </button>
+                            ${['PENDING', 'APPROVED'].includes(row.status) ? `
+                                <button onclick="cancelRequest('${row.id}')" title="Cancel request" class="p-1.5 text-slate-400 hover:text-amber-600 rounded-lg hover:bg-amber-50">
+                                    <i data-lucide="ban" class="w-4 h-4"></i>
+                                </button>
+                            ` : ''}
                         </div>
                     </td>
                 `;
-                DOM.leaveTableBody.appendChild(tr);
+                tableBody.appendChild(tr);
             });
+
+            lucide.createIcons();
         }
 
         function renderPagination() {
             const start = state.totalRecords === 0 ? 0 : (state.currentPage - 1) * state.pageSize + 1;
             const end = Math.min(state.currentPage * state.pageSize, state.totalRecords);
 
-            DOM.pageStart.textContent = start;
-            DOM.pageEnd.textContent = end;
-            DOM.totalCount.textContent = state.totalRecords;
+            document.getElementById('page-start').textContent = start;
+            document.getElementById('page-end').textContent = end;
+            document.getElementById('total-count').textContent = state.totalRecords;
 
             const totalPages = Math.ceil(state.totalRecords / state.pageSize) || 1;
-            DOM.btnPrev.disabled = state.currentPage <= 1;
-            DOM.btnNext.disabled = state.currentPage >= totalPages;
+            document.getElementById('btn-prev').disabled = state.currentPage <= 1;
+            document.getElementById('btn-next').disabled = state.currentPage >= totalPages;
 
-            DOM.pageNumbers.innerHTML = '';
+            const pageNumbers = document.getElementById('page-numbers');
+            pageNumbers.innerHTML = '';
             for (let i = 1; i <= Math.min(totalPages, 5); i++) {
                 const btn = document.createElement('button');
                 btn.className = `px-2.5 py-1 rounded-lg text-xs font-semibold ${i === state.currentPage ? 'bg-brand-700 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`;
                 btn.textContent = i;
                 btn.onclick = () => goToPage(i);
-                DOM.pageNumbers.appendChild(btn);
+                pageNumbers.appendChild(btn);
             }
         }
 
@@ -933,90 +1289,205 @@
             const totalPages = Math.ceil(state.totalRecords / state.pageSize) || 1;
             if (page < 1 || page > totalPages) return;
             state.currentPage = page;
-            fetchLeaveRequests();
+            loadLeaveRequests();
         }
 
         function changePageSize(size) {
             state.pageSize = parseInt(size, 10);
             state.currentPage = 1;
-            fetchLeaveRequests();
+            loadLeaveRequests();
         }
 
-        //------------------------------------------------------------------
-        // 9. FILTERING DEBOUNCE
-        //------------------------------------------------------------------
-        function setupDebouncedFilters() {
-            let timeout = null;
-            const trigger = () => {
-                clearTimeout(timeout);
-                timeout = setTimeout(() => {
-                    state.filters.search = DOM.filterSearch.value.trim();
-                    state.filters.departmentId = DOM.filterDept.value;
-                    state.filters.type = DOM.filterType.value;
-                    state.filters.status = DOM.filterStatus.value;
-                    state.filters.startDate = DOM.filterStart.value;
-                    state.filters.endDate = DOM.filterEnd.value;
-                    state.currentPage = 1;
-                    fetchLeaveRequests();
-                }, 300);
-            };
+        //==================================================
+        // 10. FILTERS ACTION
+        //==================================================
+        function applyFilters() {
+            state.filters.search = document.getElementById('filter-search').value.trim();
+            state.filters.leaveTypeId = document.getElementById('filter-leave-type').value;
+            state.filters.status = document.getElementById('filter-status').value;
+            state.filters.departmentId = document.getElementById('filter-department').value;
+            state.filters.year = document.getElementById('filter-year').value;
+            state.filters.startDate = document.getElementById('filter-start-date').value;
+            state.filters.endDate = document.getElementById('filter-end-date').value;
 
-            DOM.filterSearch.addEventListener('input', trigger);
-            DOM.filterDept.addEventListener('change', trigger);
-            DOM.filterType.addEventListener('change', trigger);
-            DOM.filterStatus.addEventListener('change', trigger);
-            DOM.filterStart.addEventListener('change', trigger);
-            DOM.filterEnd.addEventListener('change', trigger);
+            state.currentPage = 1;
+            loadLeaveRequests();
+            loadSummary();
+            loadChartData();
         }
 
         function resetFilters() {
-            DOM.filterSearch.value = '';
-            DOM.filterDept.value = '';
-            DOM.filterType.value = '';
-            DOM.filterStatus.value = '';
-            DOM.filterStart.value = '';
-            DOM.filterEnd.value = '';
+            document.getElementById('filter-search').value = '';
+            document.getElementById('filter-leave-type').value = '';
+            document.getElementById('filter-status').value = '';
+            document.getElementById('filter-department').value = '';
+            document.getElementById('filter-year').value = '2025';
+            document.getElementById('filter-start-date').value = '';
+            document.getElementById('filter-end-date').value = '';
 
-            state.filters = { search: '', departmentId: '', type: '', status: '', startDate: '', endDate: '' };
+            state.filters = {
+                search: '',
+                leaveTypeId: '',
+                status: '',
+                departmentId: '',
+                year: '2025',
+                startDate: '',
+                endDate: ''
+            };
+
             state.currentPage = 1;
-            fetchLeaveRequests();
+            loadLeaveRequests();
+            loadSummary();
+            loadChartData();
         }
 
-        //------------------------------------------------------------------
-        // 10. MODAL MANAGEMENT & ANIMATIONS
-        //------------------------------------------------------------------
+        //==================================================
+        // 11. LEAVE REQUEST CRUD & MODAL
+        //==================================================
         function openCreateModal() {
-            DOM.leaveForm.reset();
-            DOM.formLeaveId.value = '';
-            DOM.computedDays.textContent = '0 Days';
-            document.getElementById('modal-form-title').textContent = 'Add Leave Request';
+            document.getElementById('form-create-leave').reset();
+            document.getElementById('modal-avail-bal').textContent = '0.00 days';
+            document.getElementById('modal-req-days').textContent = '0.00 days';
+            document.getElementById('modal-rem-days').textContent = '0.00 days';
 
-            DOM.modalForm.classList.remove('pointer-events-none', 'opacity-0');
-            DOM.modalForm.classList.add('opacity-100');
-            gsap.to(DOM.modalFormCard, { scale: 1, duration: 0.2, ease: "power2.out" });
+            const modal = document.getElementById('modal-create-request');
+            const card = document.getElementById('modal-create-card');
+            modal.classList.remove('pointer-events-none', 'opacity-0');
+            modal.classList.add('opacity-100');
+            gsap.to(card, { scale: 1, duration: 0.2, ease: "power2.out" });
         }
 
-        function closeFormModal() {
-            gsap.to(DOM.modalFormCard, {
+        function closeCreateModal() {
+            const modal = document.getElementById('modal-create-request');
+            const card = document.getElementById('modal-create-card');
+            gsap.to(card, {
                 scale: 0.95,
                 duration: 0.15,
                 onComplete: () => {
-                    DOM.modalForm.classList.add('pointer-events-none', 'opacity-0');
-                    DOM.modalForm.classList.remove('opacity-100');
+                    modal.classList.add('pointer-events-none', 'opacity-0');
+                    modal.classList.remove('opacity-100');
                 }
             });
         }
 
+        function calculateModalDays() {
+            const startStr = document.getElementById('form-start-date').value;
+            const endStr = document.getElementById('form-end-date').value;
+            if (!startStr || !endStr) return 0;
+
+            const dtStart = new Date(startStr);
+            const dtEnd = new Date(endStr);
+            if (dtEnd < dtStart) {
+                document.getElementById('modal-req-days').textContent = 'Invalid Date Range';
+                return 0;
+            }
+
+            const diffTime = Math.abs(dtEnd - dtStart);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+            document.getElementById('modal-req-days').textContent = `${diffDays.toFixed(2)} days`;
+            updateModalBalanceCheck();
+            return diffDays;
+        }
+
+        async function updateModalBalanceCheck() {
+            const empId = document.getElementById('form-employee-id').value;
+            const leaveTypeId = document.getElementById('form-leave-type-id').value;
+            const reqDays = calculateModalDays();
+
+            if (!empId || !leaveTypeId) return;
+
+            try {
+                const year = new Date().getFullYear(); // Or 2025 default
+                const { data, error } = await supabase
+                    .from('employee_leave_balances')
+                    .select('remaining_days')
+                    .eq('employee_id', empId)
+                    .eq('leave_type_id', leaveTypeId)
+                    .eq('calendar_year', 2025)
+                    .maybeSingle();
+
+                if (error) throw error;
+
+                const remaining = data ? Number(data.remaining_days) : 0;
+                const remAfter = remaining - reqDays;
+
+                document.getElementById('modal-avail-bal').textContent = `${remaining.toFixed(2)} days`;
+                document.getElementById('modal-rem-days').textContent = `${remAfter.toFixed(2)} days`;
+
+                const btn = document.getElementById('btn-submit-leave');
+                if (remAfter < 0) {
+                    document.getElementById('modal-rem-days').className = 'font-bold text-rose-600';
+                    btn.disabled = true;
+                    btn.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    document.getElementById('modal-rem-days').className = 'font-bold text-brand-700';
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            } catch (err) {
+                console.error("Error checking balance:", err);
+            }
+        }
+
+        async function handleCreateSubmit(e) {
+            e.preventDefault();
+
+            const empId = document.getElementById('form-employee-id').value;
+            const leaveTypeId = document.getElementById('form-leave-type-id').value;
+            const startDate = document.getElementById('form-start-date').value;
+            const endDate = document.getElementById('form-end-date').value;
+            const reason = document.getElementById('form-reason').value.trim();
+            const days = calculateModalDays();
+
+            if (days <= 0) {
+                showToast("Please enter a valid date range.", "warning");
+                return;
+            }
+
+            const btn = document.getElementById('btn-submit-leave');
+            btn.disabled = true;
+
+            try {
+                const payload = {
+                    employee_id: empId,
+                    leave_type_id: leaveTypeId,
+                    start_date: startDate,
+                    end_date: endDate,
+                    number_of_days: days,
+                    reason: reason,
+                    status: 'PENDING'
+                };
+
+                const { error } = await supabase.from('leave_requests').insert([payload]);
+                if (error) throw error;
+
+                showToast("Leave request created successfully.", "success");
+                closeCreateModal();
+                loadLeaveRequests();
+                loadSummary();
+                loadChartData();
+            } catch (err) {
+                console.error("Error creating leave request:", err);
+                showToast("Unable to save leave request.", "error");
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        //==================================================
+        // 12. APPROVAL WORKFLOW & REJECTION & CANCEL
+        //==================================================
         function openDetailModal(id) {
-            const item = state.currentData.find(d => d.id === id);
+            const item = state.currentRequests.find(r => r.id === id);
             if (!item) return;
 
             const emp = item.employees || {};
+            const lType = item.leave_types || {};
 
-            document.getElementById('detail-modal-body').innerHTML = `
+            document.getElementById('detail-modal-content').innerHTML = `
                 <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
-                    <div class="w-10 h-10 rounded-full bg-brand-100 border border-brand-200 flex items-center justify-center font-bold text-brand-800 text-sm">
-                        ${emp.full_name ? emp.full_name.substring(0,2).toUpperCase() : 'EM'}
+                    <div class="w-10 h-10 rounded-full bg-brand-100 text-brand-800 font-bold flex items-center justify-center text-xs">
+                        ${getInitials(emp.full_name)}
                     </div>
                     <div>
                         <div class="font-bold text-slate-900">${emp.full_name || 'N/A'}</div>
@@ -1027,7 +1498,7 @@
                 <div class="grid grid-cols-2 gap-3 text-xs">
                     <div class="p-3 bg-slate-50 rounded-lg">
                         <span class="text-slate-400 block mb-1">Leave Type</span>
-                        <span class="font-semibold text-slate-800">${item.leave_type}</span>
+                        <span class="font-semibold text-slate-800">${lType.leave_name} (${lType.leave_code})</span>
                     </div>
                     <div class="p-3 bg-slate-50 rounded-lg">
                         <span class="text-slate-400 block mb-1">Status</span>
@@ -1035,11 +1506,11 @@
                     </div>
                     <div class="p-3 bg-slate-50 rounded-lg">
                         <span class="text-slate-400 block mb-1">Start Date</span>
-                        <span class="font-semibold text-slate-800">${formatPHTDate(item.start_date)}</span>
+                        <span class="font-semibold text-slate-800">${formatPHDate(item.start_date)}</span>
                     </div>
                     <div class="p-3 bg-slate-50 rounded-lg">
                         <span class="text-slate-400 block mb-1">End Date</span>
-                        <span class="font-semibold text-slate-800">${formatPHTDate(item.end_date)}</span>
+                        <span class="font-semibold text-slate-800">${formatPHDate(item.end_date)}</span>
                     </div>
                 </div>
 
@@ -1055,180 +1526,418 @@
                     </div>
                 ` : ''}
 
-                <div class="text-[11px] text-slate-400 border-t border-slate-100 pt-3 flex justify-between">
-                    <span>Filed: ${formatPHTDateTime(item.created_at)}</span>
-                    ${item.updated_at ? `<span>Updated: ${formatPHTDateTime(item.updated_at)}</span>` : ''}
+                <div class="text-[11px] text-slate-400 border-t border-slate-100 pt-3 space-y-1">
+                    <div>Requested Date: ${formatPHDateTime(item.created_at)}</div>
+                    <div>Approved By: ${item.approver?.full_name || 'N/A'}</div>
+                    <div>Approved At: ${formatPHDateTime(item.approved_at)}</div>
                 </div>
             `;
 
-            const actionsContainer = document.getElementById('detail-actions');
-            actionsContainer.innerHTML = item.status === 'PENDING' ? `
-                <button onclick="closeDetailModal(); promptStatusUpdate('${item.id}', 'REJECTED')" class="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold text-xs rounded-xl transition-all">Reject Request</button>
-                <button onclick="closeDetailModal(); promptStatusUpdate('${item.id}', 'APPROVED')" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white font-semibold text-xs rounded-xl shadow-sm transition-all">Approve Request</button>
+            const actions = document.getElementById('detail-modal-actions');
+            actions.innerHTML = item.status === 'PENDING' ? `
+                <button onclick="closeDetailModal(); openRejectModal('${item.id}')" class="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold text-xs rounded-xl">Reject</button>
+                <button onclick="closeDetailModal(); approveRequest('${item.id}')" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white font-semibold text-xs rounded-xl shadow-sm">Approve</button>
             ` : `<button onclick="closeDetailModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl">Close</button>`;
 
-            DOM.modalDetail.classList.remove('pointer-events-none', 'opacity-0');
-            DOM.modalDetail.classList.add('opacity-100');
-            gsap.to(DOM.modalDetailCard, { scale: 1, duration: 0.2, ease: "power2.out" });
+            const modal = document.getElementById('modal-detail');
+            const card = document.getElementById('modal-detail-card');
+            modal.classList.remove('pointer-events-none', 'opacity-0');
+            modal.classList.add('opacity-100');
+            gsap.to(card, { scale: 1, duration: 0.2, ease: "power2.out" });
         }
 
         function closeDetailModal() {
-            gsap.to(DOM.modalDetailCard, {
+            const modal = document.getElementById('modal-detail');
+            const card = document.getElementById('modal-detail-card');
+            gsap.to(card, {
                 scale: 0.95,
                 duration: 0.15,
                 onComplete: () => {
-                    DOM.modalDetail.classList.add('pointer-events-none', 'opacity-0');
-                    DOM.modalDetail.classList.remove('opacity-100');
+                    modal.classList.add('pointer-events-none', 'opacity-0');
+                    modal.classList.remove('opacity-100');
                 }
             });
         }
 
-        //------------------------------------------------------------------
-        // 11. WORKFLOW APPROVALS & CONFIRMATIONS
-        //------------------------------------------------------------------
-        function promptStatusUpdate(id, targetStatus) {
-            state.pendingAction = { id, targetStatus };
-            const isApprove = targetStatus === 'APPROVED';
-
-            const iconWrapper = document.getElementById('confirm-icon-wrapper');
-            iconWrapper.className = `w-12 h-12 rounded-full mx-auto flex items-center justify-center mb-4 ${isApprove ? 'bg-brand-50 text-brand-600' : 'bg-rose-50 text-rose-600'}`;
-            iconWrapper.innerHTML = `<i class="fa-solid ${isApprove ? 'fa-circle-check' : 'fa-circle-xmark'} text-xl"></i>`;
-
-            document.getElementById('confirm-title').textContent = isApprove ? 'Approve Leave Request' : 'Reject Leave Request';
-            document.getElementById('confirm-description').textContent = isApprove 
-                ? 'Are you sure you want to approve this leave request? This will clear the leave for payroll computations.'
-                : 'Please state a reason for rejecting this request.';
-
-            const rejectionContainer = document.getElementById('rejection-reason-container');
-            if (!isApprove) {
-                rejectionContainer.classList.remove('hidden');
-                document.getElementById('confirm-rejection-reason').value = '';
-            } else {
-                rejectionContainer.classList.add('hidden');
-            }
-
-            const btnSubmit = document.getElementById('btn-confirm-submit');
-            btnSubmit.className = `px-5 py-2 text-white font-semibold text-sm rounded-xl shadow-sm transition-all ${isApprove ? 'bg-brand-700 hover:bg-brand-800' : 'bg-rose-600 hover:bg-rose-700'}`;
-            btnSubmit.onclick = executeStatusUpdate;
-
-            DOM.modalConfirm.classList.remove('pointer-events-none', 'opacity-0');
-            DOM.modalConfirm.classList.add('opacity-100');
-        }
-
-        function closeConfirmModal() {
-            DOM.modalConfirm.classList.add('pointer-events-none', 'opacity-0');
-            DOM.modalConfirm.classList.remove('opacity-100');
-            state.pendingAction = null;
-        }
-
-        async function executeStatusUpdate() {
-            if (!state.pendingAction) return;
-
-            const { id, targetStatus } = state.pendingAction;
-            const rejectionReason = document.getElementById('confirm-rejection-reason').value.trim();
-
-            if (targetStatus === 'REJECTED' && !rejectionReason) {
-                showToast('warning', 'Rejection reason is required');
-                return;
-            }
+        async function approveRequest(id) {
+            if (!confirm("Are you sure you want to approve this leave request?")) return;
 
             try {
+                let approverId = state.currentEmployee ? state.currentEmployee.id : null;
+
                 const payload = {
-                    status: targetStatus,
+                    status: 'APPROVED',
+                    approved_by: approverId,
+                    approved_at: new Date().toISOString(),
                     updated_at: new Date().toISOString()
                 };
 
-                if (targetStatus === 'REJECTED') {
-                    payload.rejection_reason = rejectionReason;
-                }
-
-                const { error } = await supabaseClient
-                    .from(state.leaveTableTarget)
+                const { error } = await supabase
+                    .from('leave_requests')
                     .update(payload)
                     .eq('id', id);
 
                 if (error) throw error;
 
-                showToast('success', `Leave request ${targetStatus.toLowerCase()} successfully`);
-                closeConfirmModal();
-                refreshAllData();
+                showToast("Leave request approved.", "success");
+                loadLeaveRequests();
+                loadSummary();
+                loadChartData();
+                loadLeaveBalances();
             } catch (err) {
-                console.error("Status update error:", err);
-                showToast('error', 'Failed to update request status');
+                console.error("Error approving leave request:", err);
+                showToast("Unable to approve leave request.", "error");
             }
         }
 
-        //------------------------------------------------------------------
-        // 12. CRUD ACTIONS
-        //------------------------------------------------------------------
-        async function handleFormSubmit(event) {
-            event.preventDefault();
+        function openRejectModal(id) {
+            state.pendingActionId = id;
+            document.getElementById('reject-reason-input').value = '';
 
-            const employeeId = DOM.formEmployeeId.value;
-            const leaveType = DOM.formLeaveType.value;
-            const startDate = DOM.formStartDate.value;
-            const endDate = DOM.formEndDate.value;
-            const reason = DOM.formReason.value.trim();
-            const days = calculateDays();
+            const modal = document.getElementById('modal-reject');
+            modal.classList.remove('pointer-events-none', 'opacity-0');
+            modal.classList.add('opacity-100');
+        }
 
-            if (days <= 0) {
-                showToast('warning', 'Please enter a valid start and end date range');
+        function closeRejectModal() {
+            const modal = document.getElementById('modal-reject');
+            modal.classList.add('pointer-events-none', 'opacity-0');
+            modal.classList.remove('opacity-100');
+            state.pendingActionId = null;
+        }
+
+        async function executeReject() {
+            const reason = document.getElementById('reject-reason-input').value.trim();
+            if (!reason) {
+                showToast("Rejection reason is required.", "warning");
                 return;
             }
 
-            const btnSave = document.getElementById('btn-save-leave');
-            btnSave.disabled = true;
-            btnSave.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-xs"></i> Saving...`;
-
             try {
                 const payload = {
-                    employee_id: employeeId,
-                    leave_type: leaveType,
-                    start_date: startDate,
-                    end_date: endDate,
-                    number_of_days: days,
-                    reason: reason,
-                    status: 'PENDING'
+                    status: 'REJECTED',
+                    rejection_reason: reason,
+                    updated_at: new Date().toISOString()
                 };
 
-                const { error } = await supabaseClient
-                    .from(state.leaveTableTarget)
-                    .insert([payload]);
+                const { error } = await supabase
+                    .from('leave_requests')
+                    .update(payload)
+                    .eq('id', state.pendingActionId);
 
                 if (error) throw error;
 
-                showToast('success', 'Leave request created successfully');
-                closeFormModal();
-                refreshAllData();
+                showToast("Leave request rejected.", "success");
+                closeRejectModal();
+                loadLeaveRequests();
+                loadSummary();
+                loadChartData();
             } catch (err) {
-                console.error("Save leave error:", err);
-                showToast('error', 'Failed to save leave request');
-            } finally {
-                btnSave.disabled = false;
-                btnSave.innerHTML = `<i class="fa-solid fa-floppy-disk text-xs"></i> Save Request`;
+                console.error("Error rejecting leave request:", err);
+                showToast("Unable to reject leave request.", "error");
             }
         }
 
-        async function deleteRecord(id) {
-            if (!confirm('Are you sure you want to delete this leave record? This action cannot be undone.')) return;
+        async function cancelRequest(id) {
+            if (!confirm("Are you sure you want to cancel this leave request?")) return;
 
             try {
-                const { error } = await supabaseClient
-                    .from(state.leaveTableTarget)
-                    .delete()
+                const { error } = await supabase
+                    .from('leave_requests')
+                    .update({ status: 'CANCELLED', updated_at: new Date().toISOString() })
                     .eq('id', id);
 
                 if (error) throw error;
 
-                showToast('success', 'Leave record deleted successfully');
-                refreshAllData();
+                showToast("Leave request cancelled.", "info");
+                loadLeaveRequests();
+                loadSummary();
+                loadChartData();
+                loadLeaveBalances();
             } catch (err) {
-                console.error("Delete record error:", err);
-                showToast('error', 'Failed to delete leave record');
+                console.error("Error cancelling request:", err);
+                showToast("Unable to cancel leave request.", "error");
             }
         }
 
-        // Initialize Application
+        //==================================================
+        // 13. LEAVE BALANCES PANEL & DRAWER
+        //==================================================
+        async function loadLeaveBalances() {
+            try {
+                const year = parseInt(document.getElementById('balance-filter-year').value || '2025', 10);
+                const deptId = document.getElementById('balance-filter-dept').value;
+                const search = document.getElementById('balance-filter-search').value.trim();
+
+                let query = supabase
+                    .from('employee_leave_balances')
+                    .select(`
+                        *,
+                        employees!employee_leave_balances_employee_id_fkey(id, full_name, employee_number, department_id, departments(department_name)),
+                        leave_types!employee_leave_balances_leave_type_id_fkey(id, leave_code, leave_type)
+                    `)
+                    .eq('calendar_year', year);
+
+                if (deptId) {
+                    query = query.eq('employees.department_id', deptId);
+                }
+
+                const { data, error } = await query;
+                if (error) throw error;
+
+                state.currentBalances = data || [];
+
+                // Group balances by employee
+                const empMap = {};
+                state.currentBalances.forEach(b => {
+                    const emp = b.employees;
+                    if (!emp) return;
+
+                    if (search) {
+                        const s = search.toLowerCase();
+                        if (!emp.full_name?.toLowerCase().includes(s) && !emp.employee_number?.toLowerCase().includes(s)) return;
+                    }
+
+                    if (!empMap[emp.id]) {
+                        empMap[emp.id] = {
+                            employee: emp,
+                            categories: {},
+                            totalUsed: 0,
+                            totalRemaining: 0
+                        };
+                    }
+
+                    const code = b.leave_types?.leave_type || 'OTHER';
+                    empMap[emp.id].categories[code] = b;
+                    empMap[emp.id].totalUsed += Number(b.used_days || 0);
+                    empMap[emp.id].totalRemaining += Number(b.remaining_days || 0);
+                });
+
+                renderBalancesTable(Object.values(empMap));
+            } catch (err) {
+                console.error("Error loading leave balances:", err);
+            }
+        }
+
+        function renderBalancesTable(employeeBalances) {
+            const tableBody = document.getElementById('balances-table-body');
+            tableBody.innerHTML = '';
+
+            if (employeeBalances.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="13" class="py-8 text-center text-slate-400">No balance records found.</td></tr>`;
+                return;
+            }
+
+            employeeBalances.forEach(item => {
+                const emp = item.employee;
+                const cats = item.categories;
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 cursor-pointer transition-colors';
+                tr.onclick = () => openEmpBalancesModal(emp, cats);
+
+                const renderCell = (code) => {
+                    const rec = cats[code];
+                    if (!rec) return `<td class="py-3 px-3 text-center text-slate-300">--</td>`;
+                    const rem = Number(rec.remaining_days || 0);
+                    const isLow = rem <= 2;
+                    return `
+                        <td class="py-3 px-3 text-center font-medium ${isLow ? 'text-amber-600 bg-amber-50/50 rounded font-bold' : 'text-slate-700'}">
+                            ${rem.toFixed(1)}
+                        </td>
+                    `;
+                };
+
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-semibold text-slate-900">${emp.full_name || 'N/A'}</td>
+                    <td class="py-3 px-4 text-slate-500">${emp.employee_number || 'N/A'}</td>
+                    <td class="py-3 px-4 text-slate-500">${emp.departments?.department_name || 'Unassigned'}</td>
+                    ${renderCell('VACATION')}
+                    ${renderCell('SICK')}
+                    ${renderCell('EMERGENCY')}
+                    ${renderCell('SPECIAL')}
+                    ${renderCell('MATERNITY')}
+                    ${renderCell('PATERNITY')}
+                    ${renderCell('SOLO_PARENT')}
+                    ${renderCell('OTHER')}
+                    <td class="py-3 px-4 text-center font-bold text-slate-800">${item.totalUsed.toFixed(1)}</td>
+                    <td class="py-3 px-4 text-center font-bold text-brand-700">${item.totalRemaining.toFixed(1)}</td>
+                `;
+
+                tableBody.appendChild(tr);
+            });
+        }
+
+        function openEmpBalancesModal(emp, cats) {
+            document.getElementById('emp-bal-name').textContent = emp.full_name;
+            document.getElementById('emp-bal-sub').textContent = `${emp.employee_number || ''} • ${emp.departments?.department_name || 'Unassigned'}`;
+            document.getElementById('emp-bal-avatar').textContent = getInitials(emp.full_name);
+
+            const grid = document.getElementById('emp-bal-cards-grid');
+            grid.innerHTML = '';
+
+            const keys = ['VACATION', 'SICK', 'EMERGENCY', 'SPECIAL', 'MATERNITY', 'PATERNITY', 'SOLO_PARENT', 'OTHER'];
+            keys.forEach(k => {
+                const b = cats[k] || { allocated_days: 0, used_days: 0, remaining_days: 0 };
+                const alloc = Number(b.allocated_days || 0);
+                const used = Number(b.used_days || 0);
+                const rem = Number(b.remaining_days || 0);
+                const pct = alloc > 0 ? Math.min(100, Math.max(0, (used / alloc) * 100)) : 0;
+
+                const card = document.createElement('div');
+                card.className = 'bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-2';
+                card.innerHTML = `
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-bold text-slate-800">${k}</span>
+                        <span class="text-slate-500">${rem.toFixed(1)} Days Left</span>
+                    </div>
+                    <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                        <div class="progress-bar bg-brand-600 h-full rounded-full" style="width: 0%"></div>
+                    </div>
+                    <div class="flex justify-between text-[11px] text-slate-500 pt-1">
+                        <span>Allocated: ${alloc.toFixed(1)}</span>
+                        <span>Used: ${used.toFixed(1)}</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+
+                // GSAP Progress Bar Animation
+                gsap.to(card.querySelector('.progress-bar'), { width: `${pct}%`, duration: 0.8, ease: "power2.out" });
+            });
+
+            const modal = document.getElementById('modal-employee-balances');
+            const card = document.getElementById('modal-employee-balances-card');
+            modal.classList.remove('pointer-events-none', 'opacity-0');
+            modal.classList.add('opacity-100');
+            gsap.to(card, { scale: 1, duration: 0.2, ease: "power2.out" });
+        }
+
+        function closeEmpBalancesModal() {
+            const modal = document.getElementById('modal-employee-balances');
+            const card = document.getElementById('modal-employee-balances-card');
+            gsap.to(card, {
+                scale: 0.95,
+                duration: 0.15,
+                onComplete: () => {
+                    modal.classList.add('pointer-events-none', 'opacity-0');
+                    modal.classList.remove('opacity-100');
+                }
+            });
+        }
+
+        //==================================================
+        // 14. EXPORT TO CSV
+        //==================================================
+        async function exportToCSV() {
+            try {
+                showToast("Preparing dataset export...", "info");
+
+                let query = supabase
+                    .from('leave_requests')
+                    .select(`
+                        start_date, end_date, number_of_days, status, reason, created_at,
+                        employees!leave_requests_employee_id_fkey(full_name, employee_number, departments(department_name)),
+                        leave_types!leave_requests_leave_type_id_fkey(leave_name),
+                        approver:employees!leave_requests_approved_by_fkey(full_name)
+                    `);
+
+                const { data, error } = await query;
+                if (error) throw error;
+
+                let csv = 'Employee Number,Employee Name,Department,Leave Type,Start Date,End Date,Number of Days,Status,Reason,Approved By\n';
+                data.forEach(r => {
+                    const empNum = `"${r.employees?.employee_number || ''}"`;
+                    const empName = `"${r.employees?.full_name || ''}"`;
+                    const dept = `"${r.employees?.departments?.department_name || ''}"`;
+                    const type = `"${r.leave_types?.leave_name || ''}"`;
+                    const start = `"${formatPHDate(r.start_date)}"`;
+                    const end = `"${formatPHDate(r.end_date)}"`;
+                    const days = r.number_of_days || 0;
+                    const status = `"${r.status || ''}"`;
+                    const reason = `"${(r.reason || '').replace(/"/g, '""')}"`;
+                    const approver = `"${r.approver?.full_name || ''}"`;
+
+                    csv += `${empNum},${empName},${dept},${type},${start},${end},${days},${status},${reason},${approver}\n`;
+                });
+
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                link.setAttribute("download", `Leave_Requests_Report_${new Date().toISOString().slice(0,10)}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                showToast("Export completed successfully.", "success");
+            } catch (err) {
+                console.error("Export error:", err);
+                showToast("Failed to export dataset.", "error");
+            }
+        }
+
+        //==================================================
+        // 15. TOAST NOTIFICATIONS
+        //==================================================
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+
+            const styles = {
+                success: 'bg-slate-900 text-white border-brand-500',
+                error: 'bg-rose-900 text-white border-rose-500',
+                warning: 'bg-amber-900 text-white border-amber-500',
+                info: 'bg-slate-900 text-white border-slate-700'
+            };
+
+            const icons = {
+                success: 'check-circle-2 text-brand-400',
+                error: 'alert-triangle text-rose-400',
+                warning: 'alert-circle text-amber-400',
+                info: 'info text-blue-400'
+            };
+
+            toast.className = `pointer-events-auto flex items-center gap-3 p-4 rounded-xl border shadow-xl text-xs font-semibold transition-all duration-300 transform translate-y-2 opacity-0 ${styles[type] || styles.info}`;
+            toast.innerHTML = `
+                <i data-lucide="${icons[type] || icons.info}" class="w-4 h-4 flex-shrink-0"></i>
+                <span class="flex-1">${message}</span>
+                <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+            `;
+
+            container.appendChild(toast);
+            lucide.createIcons();
+
+            gsap.to(toast, { y: 0, opacity: 1, duration: 0.3 });
+
+            setTimeout(() => {
+                gsap.to(toast, { y: -10, opacity: 0, duration: 0.3, onComplete: () => toast.remove() });
+            }, 4000);
+        }
+
+        //==================================================
+        // 16. INITIALIZATION
+        //==================================================
+        async function initPage() {
+            AOS.init({ duration: 600, once: true });
+            lucide.createIcons();
+            updateHeaderDateTime();
+            setInterval(updateHeaderDateTime, 1000);
+
+            await initAuth();
+            await Promise.all([
+                loadLeaveTypes(),
+                loadDepartments(),
+                loadEmployeeOptions()
+            ]);
+
+            await Promise.all([
+                loadLeaveRequests(),
+                loadSummary(),
+                loadChartData(),
+                loadLeaveBalances()
+            ]);
+        }
+
         document.addEventListener('DOMContentLoaded', initPage);
     </script>
 </body>

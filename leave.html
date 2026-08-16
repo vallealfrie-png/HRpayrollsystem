@@ -734,7 +734,7 @@
                 }
                 if (state.filters.search) {
                     const search = `%${state.filters.search}%`;
-                    query = query.or(`full_name.ilike.${search},employee_number.ilike.${search}`, { foreignTable: 'employees' });
+                    query = query.or(`full_name.ilike."${search}",employee_number.ilike."${search}"`, { foreignTable: 'employees' });
                 }
 
                 // Server-side Pagination

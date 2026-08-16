@@ -92,7 +92,12 @@
 
         <!-- Page Header -->
         <header class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80" data-aos="fade-down">
-            <div>
+            <div class="flex items-center gap-4">
+                <!-- Option A: Back to Main Dashboard Link -->
+                <a href="index.html" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-all duration-200 active:scale-95" title="Back to Dashboard">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-700">
                         <i class="fa-solid me-0 fa-calendar-check text-xl"></i>
@@ -491,7 +496,7 @@
             currentPage: 1,
             pageSize: 25,
             totalRecords: 0,
-            leaveTableTarget: 'leaves', // Will automatically fallback to leave_requests if needed
+            leaveTableTarget: 'leaves',
             filters: {
                 search: '',
                 departmentId: '',
@@ -645,7 +650,6 @@
         }
 
         async function verifyLeaveTableTarget() {
-            // Check if primary 'leaves' table exists; if error, switch target to 'leave_requests'
             const { error } = await supabaseClient.from('leaves').select('id').limit(1);
             if (error && error.message.includes('does not exist')) {
                 state.leaveTableTarget = 'leave_requests';
@@ -716,7 +720,6 @@
                         )
                     `, { count: 'exact' });
 
-                // Filters application
                 if (state.filters.type) {
                     query = query.eq('leave_type', state.filters.type);
                 }
@@ -737,7 +740,6 @@
                     query = query.or(`full_name.ilike.${search},employee_number.ilike.${search}`, { foreignTable: 'employees' });
                 }
 
-                // Server-side Pagination
                 const from = (state.currentPage - 1) * state.pageSize;
                 const to = from + state.pageSize - 1;
 
@@ -785,7 +787,6 @@
                     typeCounts[item.leave_type] = (typeCounts[item.leave_type] || 0) + 1;
                 });
 
-                // Update KPI Cards
                 document.getElementById('kpi-total').textContent = counts.total;
                 document.getElementById('kpi-pending').textContent = counts.PENDING;
                 document.getElementById('kpi-approved').textContent = counts.APPROVED;
@@ -799,7 +800,6 @@
         }
 
         function renderCharts(statusCounts, typeCounts) {
-            // Chart 1: Status Distribution
             Highcharts.chart('chart-status', {
                 chart: { type: 'pie', backgroundColor: 'transparent' },
                 title: { text: null },
@@ -822,7 +822,6 @@
                 }]
             });
 
-            // Chart 2: Types Breakdown
             const typeSeries = Object.keys(typeCounts).map(k => ({ name: k, y: typeCounts[k] }));
             Highcharts.chart('chart-types', {
                 chart: { type: 'column', backgroundColor: 'transparent' },

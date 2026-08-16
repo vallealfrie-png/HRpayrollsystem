@@ -472,26 +472,26 @@
 
     <!-- APPLICATION SCRIPT LOGIC -->
     <script>
-        /------------------------------------------------------------------
-         * 1. CONFIGURATION & CONSTANTS
-         *----------------------------------------------------------------*/
+        //------------------------------------------------------------------
+        // 1. CONFIGURATION & CONSTANTS
+        //------------------------------------------------------------------
         const SUPABASE_URL = 'https://trockfedsoekzdhumpba.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_5I1FFmkfKxUvOyqOH6ZkZw_oHE8vb1a';
         const TIMEZONE = 'Asia/Manila';
 
-        /------------------------------------------------------------------
-         * 2. SUPABASE INITIALIZATION
-         *----------------------------------------------------------------*/
+        //------------------------------------------------------------------
+        // 2. SUPABASE INITIALIZATION
+        //------------------------------------------------------------------
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        /------------------------------------------------------------------
-         * 3. GLOBAL STATE MANAGEMENT
-         *----------------------------------------------------------------*/
+        //------------------------------------------------------------------
+        // 3. GLOBAL STATE MANAGEMENT
+        //------------------------------------------------------------------
         const state = {
             currentPage: 1,
             pageSize: 25,
             totalRecords: 0,
-            leaveTableTarget: 'leaves',
+            leaveTableTarget: 'leaves', // Will automatically fallback to leave_requests if needed
             filters: {
                 search: '',
                 departmentId: '',
@@ -506,9 +506,9 @@
             pendingAction: null
         };
 
-        /------------------------------------------------------------------
-         * 4. DOM REFERENCES
-         *----------------------------------------------------------------*/
+        //------------------------------------------------------------------
+        // 4. DOM REFERENCES
+        //------------------------------------------------------------------
         const DOM = {
             leaveTableBody: document.getElementById('leave-table-body'),
             tableSkeleton: document.getElementById('table-skeleton'),
@@ -525,11 +525,13 @@
             filterStatus: document.getElementById('filter-status'),
             filterStart: document.getElementById('filter-start-date'),
             filterEnd: document.getElementById('filter-end-date'),
+            // Modal DOMs
             modalForm: document.getElementById('modal-leave-form'),
             modalFormCard: document.getElementById('modal-leave-card'),
             modalDetail: document.getElementById('modal-detail'),
             modalDetailCard: document.getElementById('modal-detail-card'),
             modalConfirm: document.getElementById('modal-confirm'),
+            // Forms
             leaveForm: document.getElementById('leave-form'),
             formLeaveId: document.getElementById('form-leave-id'),
             formEmployeeId: document.getElementById('form-employee-id'),
@@ -540,9 +542,9 @@
             computedDays: document.getElementById('computed-days')
         };
 
-        /------------------------------------------------------------------
-         * 5. UTILITY FUNCTIONS
-         *----------------------------------------------------------------*/
+        //------------------------------------------------------------------
+        // 5. UTILITY FUNCTIONS
+        //------------------------------------------------------------------
         function formatPHTDate(dateStr) {
             if (!dateStr) return 'N/A';
             const date = new Date(dateStr);
@@ -630,9 +632,9 @@
             return diffDays;
         }
 
-        /------------------------------------------------------------------
-         * 6. DATA LOADING & INITIALIZATION
-         *----------------------------------------------------------------*/
+        //------------------------------------------------------------------
+        // 6. DATA LOADING & INITIALIZATION
+        //------------------------------------------------------------------
         async function initPage() {
             AOS.init({ duration: 600, once: true });
             await loadDepartments();
@@ -643,6 +645,7 @@
         }
 
         async function verifyLeaveTableTarget() {
+            // Check if primary 'leaves' table exists; if error, switch target to 'leave_requests'
             const { error } = await supabaseClient.from('leaves').select('id').limit(1);
             if (error && error.message.includes('does not exist')) {
                 state.leaveTableTarget = 'leave_requests';
@@ -731,7 +734,7 @@
                 }
                 if (state.filters.search) {
                     const search = `%${state.filters.search}%`;
-                    query = query.or(`full_name.ilike."${search}",employee_number.ilike."${search}"`, { foreignTable: 'employees' });
+                    query = query.or(`full_name.ilike.${search},employee_number.ilike.${search}`, { foreignTable: 'employees' });
                 }
 
                 // Server-side Pagination
@@ -756,9 +759,9 @@
             }
         }
 
-        /------------------------------------------------------------------
-         * 7. STATISTICS & CHARTS
-         *----------------------------------------------------------------*/
+        //------------------------------------------------------------------
+        // 7. STATISTICS & CHARTS
+        //------------------------------------------------------------------
         async function fetchStatistics() {
             try {
                 const { data, error } = await supabaseClient
@@ -782,6 +785,7 @@
                     typeCounts[item.leave_type] = (typeCounts[item.leave_type] || 0) + 1;
                 });
 
+                // Update KPI Cards
                 document.getElementById('kpi-total').textContent = counts.total;
                 document.getElementById('kpi-pending').textContent = counts.PENDING;
                 document.getElementById('kpi-approved').textContent = counts.APPROVED;
@@ -795,6 +799,7 @@
         }
 
         function renderCharts(statusCounts, typeCounts) {
+            // Chart 1: Status Distribution
             Highcharts.chart('chart-status', {
                 chart: { type: 'pie', backgroundColor: 'transparent' },
                 title: { text: null },
@@ -817,6 +822,7 @@
                 }]
             });
 
+            // Chart 2: Types Breakdown
             const typeSeries = Object.keys(typeCounts).map(k => ({ name: k, y: typeCounts[k] }));
             Highcharts.chart('chart-types', {
                 chart: { type: 'column', backgroundColor: 'transparent' },
@@ -833,9 +839,9 @@
             });
         }
 
-        /------------------------------------------------------------------
-         * 8. TABLE RENDER & PAGINATION
-         *----------------------------------------------------------------*/
+        //------------------------------------------------------------------
+        // 8. TABLE RENDER & PAGINATION
+        //------------------------------------------------------------------
         function renderTable() {
             DOM.leaveTableBody.innerHTML = '';
 
@@ -937,9 +943,9 @@
             fetchLeaveRequests();
         }
 
-        /------------------------------------------------------------------
-         * 9. FILTERING DEBOUNCE
-         *----------------------------------------------------------------*/
+        //------------------------------------------------------------------
+        // 9. FILTERING DEBOUNCE
+        //------------------------------------------------------------------
         function setupDebouncedFilters() {
             let timeout = null;
             const trigger = () => {
@@ -977,9 +983,9 @@
             fetchLeaveRequests();
         }
 
-        /------------------------------------------------------------------
-         * 10. MODAL MANAGEMENT & ANIMATIONS
-         *----------------------------------------------------------------*/
+        //------------------------------------------------------------------
+        // 10. MODAL MANAGEMENT & ANIMATIONS
+        //------------------------------------------------------------------
         function openCreateModal() {
             DOM.leaveForm.reset();
             DOM.formLeaveId.value = '';
@@ -1078,9 +1084,9 @@
             });
         }
 
-        /------------------------------------------------------------------
-         * 11. WORKFLOW APPROVALS & CONFIRMATIONS
-         *----------------------------------------------------------------*/
+        //------------------------------------------------------------------
+        // 11. WORKFLOW APPROVALS & CONFIRMATIONS
+        //------------------------------------------------------------------
         function promptStatusUpdate(id, targetStatus) {
             state.pendingAction = { id, targetStatus };
             const isApprove = targetStatus === 'APPROVED';
@@ -1153,9 +1159,9 @@
             }
         }
 
-        /------------------------------------------------------------------
-         * 12. CRUD ACTIONS
-         *----------------------------------------------------------------*/
+        //------------------------------------------------------------------
+        // 12. CRUD ACTIONS
+        //------------------------------------------------------------------
         async function handleFormSubmit(event) {
             event.preventDefault();
 
@@ -1223,6 +1229,7 @@
             }
         }
 
+        // Initialize Application
         document.addEventListener('DOMContentLoaded', initPage);
     </script>
 </body>

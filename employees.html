@@ -654,66 +654,42 @@
     // SUMMARY STATS & GSAP ANIMATIONS
     // ----------------------------------------------------
     async function loadSummaryStats() {
-  try {
-    const { data, error } = await supabaseClient
-      .from('vw_employee_directory')
-      .select('employment_status');
+      try {
+        const { data, error } = await supabaseClient
+          .from('vw_employee_directory')
+          .select('employment_status');
 
-    if (error) throw error;
+        if (error) throw error;
 
-    const employees = data || [];
+        const employees = data || [];
+        const total = employees.length;
 
-    const total = employees.length;
+        const active = employees.filter(emp =>
+          (emp.employment_status || '').toUpperCase() === 'ACTIVE'
+        ).length;
 
-    const active = employees.filter(emp =>
-      (emp.employment_status || '').toUpperCase() === 'ACTIVE'
-    ).length;
+        const onLeave = employees.filter(emp =>
+          (emp.employment_status || '').toUpperCase() === 'ON_LEAVE'
+        ).length;
 
-    const onLeave = employees.filter(emp =>
-      (emp.employment_status || '').toUpperCase() === 'ON_LEAVE'
-    ).length;
+        const inactive = employees.filter(emp => {
+          const status = (emp.employment_status || '').toUpperCase();
+          return [
+            'INACTIVE',
+            'RESIGNED',
+            'TERMINATED',
+            'SEPARATED'
+          ].includes(status);
+        }).length;
 
-    const inactive = employees.filter(emp => {
-      const status = (emp.employment_status || '').toUpperCase();
-
-      return [
-        'INACTIVE',
-        'RESIGNED',
-        'TERMINATED',
-        'SEPARATED'
-      ].includes(status);
-    }).length;
-
-    console.log('Employee Summary:', {
-      total,
-      active,
-      onLeave,
-      inactive
-    });
-
-    animateCounter('#stat-total', total);
-    animateCounter('#stat-active', active);
-    animateCounter('#stat-leave', onLeave);
-    animateCounter('#stat-inactive', inactive);
-
-  } catch (err) {
-    console.error('Error fetching employee summary:', err);
-
-    showToast(
-      'Unable to load employee summary.',
-      'error'
-    );
-  }
-}
-
-        // Animate counter using GSAP
         animateCounter('#stat-total', total);
         animateCounter('#stat-active', active);
         animateCounter('#stat-leave', onLeave);
         animateCounter('#stat-inactive', inactive);
 
       } catch (err) {
-        console.error('Error fetching summary stats:', err);
+        console.error('Error fetching employee summary:', err);
+        showToast('Unable to load employee summary.', 'error');
       }
     }
 

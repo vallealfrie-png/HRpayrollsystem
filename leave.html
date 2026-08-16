@@ -740,7 +740,6 @@
 
         //==================================================
         // 2. SUPABASE INITIALIZATION
-        // Rename variable to avoid conflict with the window.supabase library object
         //==================================================
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -826,7 +825,7 @@
         }
 
         function getInitials(fullName) {
-            if (!fullName) return 'EM';
+            if (!fullName) return 'DEMO';
             return fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
         }
 
@@ -846,38 +845,37 @@
         }
 
         //==================================================
-        // 5. AUTHENTICATION
+        // 5. AUTHENTICATION (DEMO MODE BYPASS)
         //==================================================
         async function initAuth() {
+            // Set mock user and fallback employee for public demo
+            state.currentUser = { id: 'demo-user-id', email: 'demo@company.com' };
+            
             try {
-                const { data: { user }, error } = await supabaseClient.auth.getUser();
-                if (error || !user) {
-                    console.log("No authenticated user found or session expired.");
-                } else {
-                    state.currentUser = user;
-                    const { data: emp } = await supabaseClient
-                        .from('employees')
-                        .select('id, full_name, personal_email, avatar_url')
-                        .eq('auth_user_id', user.id)
-                        .maybeSingle();
+                const { data: emp } = await supabaseClient
+                    .from('employees')
+                    .select('id, full_name, personal_email, avatar_url')
+                    .limit(1)
+                    .maybeSingle();
 
-                    if (emp) {
-                        state.currentEmployee = emp;
-                        document.getElementById('sidebar-user-name').textContent = emp.full_name;
-                        document.getElementById('sidebar-user-email').textContent = emp.personal_email || user.email;
-                        const initials = getInitials(emp.full_name);
-                        document.getElementById('sidebar-user-avatar').textContent = initials;
-                        document.getElementById('top-user-avatar').textContent = initials;
-                    }
+                if (emp) {
+                    state.currentEmployee = emp;
+                    document.getElementById('sidebar-user-name').textContent = emp.full_name;
+                    document.getElementById('sidebar-user-email').textContent = emp.personal_email || 'demo@company.com';
+                    const initials = getInitials(emp.full_name);
+                    document.getElementById('sidebar-user-avatar').textContent = initials;
+                    document.getElementById('top-user-avatar').textContent = initials;
+                } else {
+                    document.getElementById('sidebar-user-name').textContent = "Demo Admin";
+                    document.getElementById('sidebar-user-email').textContent = "demo@company.com";
                 }
             } catch (err) {
-                console.error("Auth init exception:", err);
+                console.warn("Demo Auth init fallback applied.");
             }
         }
 
         async function handleLogout() {
-            await supabaseClient.auth.signOut();
-            showToast("Logged out successfully", "info");
+            showToast("Demo session reset", "info");
             setTimeout(() => window.location.reload(), 1000);
         }
 
@@ -894,17 +892,15 @@
                 if (error) throw error;
                 state.leaveTypes = data || [];
 
-                // Populate filter dropdown
                 const filterSelect = document.getElementById('filter-leave-type');
                 filterSelect.innerHTML = '<option value="">All Types</option>' + 
                     state.leaveTypes.map(t => `<option value="${t.id}">${t.leave_name} (${t.leave_code})</option>`).join('');
 
-                // Populate form dropdown (is_active = true)
                 const formSelect = document.getElementById('form-leave-type-id');
                 formSelect.innerHTML = '<option value="">Select Active Leave Type...</option>' + 
                     state.leaveTypes.filter(t => t.is_active).map(t => `<option value="${t.id}">${t.leave_name} (${t.leave_code})</option>`).join('');
             } catch (err) {
-                console.error("Error loading leave types:", err);
+                console.error("Error loading leave types:", err.message || err);
                 showToast("Unable to load leave types.", "error");
             }
         }
@@ -926,7 +922,7 @@
                 document.getElementById('filter-department').innerHTML = options;
                 document.getElementById('balance-filter-dept').innerHTML = options;
             } catch (err) {
-                console.error("Error loading departments:", err);
+                console.error("Error loading departments:", err.message || err);
                 showToast("Unable to load departments.", "error");
             }
         }
@@ -945,7 +941,7 @@
                 formSelect.innerHTML = '<option value="">Select Employee...</option>' + 
                     state.employees.map(e => `<option value="${e.id}">${e.full_name} (${e.employee_number})</option>`).join('');
             } catch (err) {
-                console.error("Error loading employee options:", err);
+                console.error("Error loading employee options:", err.message || err);
                 showToast("Unable to load employee list.", "error");
             }
         }
@@ -954,8 +950,8 @@
             const skeleton = document.getElementById('table-skeleton');
             const emptyState = document.getElementById('table-empty-state');
 
-            skeleton.classList.remove('hidden');
-            emptyState.classList.add('hidden');
+            if (skeleton) skeleton.classList.remove('hidden');
+            if (emptyState) emptyState.classList.add('hidden');
 
             try {
                 let query = supabaseClient
@@ -1005,10 +1001,10 @@
                 renderTable();
                 renderPagination();
             } catch (err) {
-                console.error("Error loading leave requests:", err);
+                console.error("Error loading leave requests:", err.message || err);
                 showToast("Unable to load leave requests.", "error");
             } finally {
-                skeleton.classList.add('hidden');
+                if (skeleton) skeleton.classList.add('hidden');
             }
         }
 
@@ -1028,9 +1024,9 @@
 
                 if (reqErr) throw reqErr;
 
-                let total = requests.length;
+                let total = (requests || []).length;
                 let pending = 0, approved = 0, rejected = 0;
-                requests.forEach(r => {
+                (requests || []).forEach(r => {
                     if (r.status === 'PENDING') pending++;
                     if (r.status === 'APPROVED') approved++;
                     if (r.status === 'REJECTED') rejected++;
@@ -1045,7 +1041,7 @@
 
                 let daysUsed = 0;
                 let daysRemaining = 0;
-                balances.forEach(b => {
+                (balances || []).forEach(b => {
                     daysUsed += Number(b.used_days || 0);
                     daysRemaining += Number(b.remaining_days || 0);
                 });
@@ -1058,7 +1054,7 @@
                 animateValue('kpi-days-remaining', daysRemaining, true);
 
             } catch (err) {
-                console.error("Error loading summary KPIs:", err);
+                console.error("Error loading summary KPIs:", err.message || err);
             }
         }
 
@@ -1078,7 +1074,7 @@
         }
 
         //==================================================
-        // 8. CHARTS (HIGHCHARTS ONLY)
+        // 8. CHARTS
         //==================================================
         async function loadChartData() {
             try {
@@ -1095,7 +1091,7 @@
                 const typeCounts = {};
                 const statusCounts = { APPROVED: 0, PENDING: 0, REJECTED: 0, CANCELLED: 0 };
 
-                requests.forEach(r => {
+                (requests || []).forEach(r => {
                     const tName = r.leave_types?.leave_name || 'Other';
                     typeCounts[tName] = (typeCounts[tName] || 0) + 1;
                     if (statusCounts[r.status] !== undefined) {
@@ -1151,7 +1147,7 @@
                 if (balErr) throw balErr;
 
                 let totAlloc = 0, totUsed = 0, totRem = 0;
-                balances.forEach(b => {
+                (balances || []).forEach(b => {
                     totAlloc += Number(b.allocated_days || 0);
                     totUsed += Number(b.used_days || 0);
                     totRem += Number(b.remaining_days || 0);
@@ -1175,7 +1171,7 @@
                 });
 
             } catch (err) {
-                console.error("Error loading chart data:", err);
+                console.error("Error loading chart data:", err.message || err);
             }
         }
 
@@ -1195,7 +1191,7 @@
             tableBody.innerHTML = '';
 
             if (state.currentRequests.length === 0) {
-                emptyState.classList.remove('hidden');
+                if (emptyState) emptyState.classList.remove('hidden');
                 return;
             }
 
@@ -1415,7 +1411,7 @@
                     btn.classList.remove('opacity-50', 'cursor-not-allowed');
                 }
             } catch (err) {
-                console.error("Error checking balance:", err);
+                console.error("Error checking balance:", err.message || err);
             }
         }
 
@@ -1457,7 +1453,7 @@
                 loadSummary();
                 loadChartData();
             } catch (err) {
-                console.error("Error creating leave request:", err);
+                console.error("Error creating leave request:", err.message || err);
                 showToast("Unable to save leave request.", "error");
             } finally {
                 btn.disabled = false;
@@ -1488,7 +1484,7 @@
                 <div class="grid grid-cols-2 gap-3 text-xs">
                     <div class="p-3 bg-slate-50 rounded-lg">
                         <span class="text-slate-400 block mb-1">Leave Type</span>
-                        <span class="font-semibold text-slate-800">${lType.leave_name} (${lType.leave_code})</span>
+                        <span class="font-semibold text-slate-800">${lType.leave_name || 'N/A'} (${lType.leave_code || 'N/A'})</span>
                     </div>
                     <div class="p-3 bg-slate-50 rounded-lg">
                         <span class="text-slate-400 block mb-1">Status</span>
@@ -1575,7 +1571,7 @@
                 loadChartData();
                 loadLeaveBalances();
             } catch (err) {
-                console.error("Error approving leave request:", err);
+                console.error("Error approving leave request:", err.message || err);
                 showToast("Unable to approve leave request.", "error");
             }
         }
@@ -1623,7 +1619,7 @@
                 loadSummary();
                 loadChartData();
             } catch (err) {
-                console.error("Error rejecting leave request:", err);
+                console.error("Error rejecting leave request:", err.message || err);
                 showToast("Unable to reject leave request.", "error");
             }
         }
@@ -1645,7 +1641,7 @@
                 loadChartData();
                 loadLeaveBalances();
             } catch (err) {
-                console.error("Error cancelling request:", err);
+                console.error("Error cancelling request:", err.message || err);
                 showToast("Unable to cancel leave request.", "error");
             }
         }
@@ -1664,7 +1660,7 @@
                     .select(`
                         *,
                         employees!employee_leave_balances_employee_id_fkey(id, full_name, employee_number, department_id, departments(department_name)),
-                        leave_types!employee_leave_balances_leave_type_id_fkey(id, leave_code, leave_type)
+                        leave_types!employee_leave_balances_leave_type_id_fkey(id, leave_code, leave_name)
                     `)
                     .eq('calendar_year', year);
 
@@ -1696,7 +1692,7 @@
                         };
                     }
 
-                    const code = b.leave_types?.leave_type || 'OTHER';
+                    const code = b.leave_types?.leave_code || 'OTHER';
                     empMap[emp.id].categories[code] = b;
                     empMap[emp.id].totalUsed += Number(b.used_days || 0);
                     empMap[emp.id].totalRemaining += Number(b.remaining_days || 0);
@@ -1704,7 +1700,7 @@
 
                 renderBalancesTable(Object.values(empMap));
             } catch (err) {
-                console.error("Error loading leave balances:", err);
+                console.error("Error loading leave balances:", err.message || err);
             }
         }
 
@@ -1741,13 +1737,13 @@
                     <td class="py-3 px-4 font-semibold text-slate-900">${emp.full_name || 'N/A'}</td>
                     <td class="py-3 px-4 text-slate-500">${emp.employee_number || 'N/A'}</td>
                     <td class="py-3 px-4 text-slate-500">${emp.departments?.department_name || 'Unassigned'}</td>
-                    ${renderCell('VACATION')}
-                    ${renderCell('SICK')}
-                    ${renderCell('EMERGENCY')}
-                    ${renderCell('SPECIAL')}
-                    ${renderCell('MATERNITY')}
-                    ${renderCell('PATERNITY')}
-                    ${renderCell('SOLO_PARENT')}
+                    ${renderCell('VL')}
+                    ${renderCell('SL')}
+                    ${renderCell('EL')}
+                    ${renderCell('SPL')}
+                    ${renderCell('ML')}
+                    ${renderCell('PL')}
+                    ${renderCell('SPL_SOLO')}
                     ${renderCell('OTHER')}
                     <td class="py-3 px-4 text-center font-bold text-slate-800">${item.totalUsed.toFixed(1)}</td>
                     <td class="py-3 px-4 text-center font-bold text-brand-700">${item.totalRemaining.toFixed(1)}</td>
@@ -1765,7 +1761,7 @@
             const grid = document.getElementById('emp-bal-cards-grid');
             grid.innerHTML = '';
 
-            const keys = ['VACATION', 'SICK', 'EMERGENCY', 'SPECIAL', 'MATERNITY', 'PATERNITY', 'SOLO_PARENT', 'OTHER'];
+            const keys = ['VL', 'SL', 'EL', 'SPL', 'ML', 'PL', 'SPL_SOLO', 'OTHER'];
             keys.forEach(k => {
                 const b = cats[k] || { allocated_days: 0, used_days: 0, remaining_days: 0 };
                 const alloc = Number(b.allocated_days || 0);
@@ -1833,7 +1829,7 @@
                 if (error) throw error;
 
                 let csv = 'Employee Number,Employee Name,Department,Leave Type,Start Date,End Date,Number of Days,Status,Reason,Approved By\n';
-                data.forEach(r => {
+                (data || []).forEach(r => {
                     const empNum = `"${r.employees?.employee_number || ''}"`;
                     const empName = `"${r.employees?.full_name || ''}"`;
                     const dept = `"${r.employees?.departments?.department_name || ''}"`;
@@ -1859,16 +1855,18 @@
 
                 showToast("Export completed successfully.", "success");
             } catch (err) {
-                console.error("Export error:", err);
+                console.error("Export error:", err.message || err);
                 showToast("Failed to export dataset.", "error");
             }
         }
 
         //==================================================
-        // 15. TOAST NOTIFICATIONS
+        // 15. TOAST NOTIFICATIONS (LUCIDE ICON PARSER FIX)
         //==================================================
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
+            if (!container) return;
+
             const toast = document.createElement('div');
 
             const styles = {
@@ -1878,16 +1876,19 @@
                 info: 'bg-slate-900 text-white border-slate-700'
             };
 
-            const icons = {
-                success: 'check-circle-2 text-brand-400',
-                error: 'alert-triangle text-rose-400',
-                warning: 'alert-circle text-amber-400',
-                info: 'info text-blue-400'
+            // Fix: Separate pure icon names from CSS class declarations
+            const iconConfig = {
+                success: { name: 'check-circle-2', class: 'text-brand-400' },
+                error: { name: 'alert-triangle', class: 'text-rose-400' },
+                warning: { name: 'alert-circle', class: 'text-amber-400' },
+                info: { name: 'info', class: 'text-blue-400' }
             };
+
+            const cfg = iconConfig[type] || iconConfig.info;
 
             toast.className = `pointer-events-auto flex items-center gap-3 p-4 rounded-xl border shadow-xl text-xs font-semibold transition-all duration-300 transform translate-y-2 opacity-0 ${styles[type] || styles.info}`;
             toast.innerHTML = `
-                <i data-lucide="${icons[type] || icons.info}" class="w-4 h-4 flex-shrink-0"></i>
+                <i data-lucide="${cfg.name}" class="w-4 h-4 flex-shrink-0 ${cfg.class}"></i>
                 <span class="flex-1">${message}</span>
                 <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
             `;
@@ -1906,7 +1907,7 @@
         // 16. INITIALIZATION
         //==================================================
         async function initPage() {
-            AOS.init({ duration: 600, once: true });
+            if (typeof AOS !== 'undefined') AOS.init({ duration: 600, once: true });
             lucide.createIcons();
             updateHeaderDateTime();
             setInterval(updateHeaderDateTime, 1000);

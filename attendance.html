@@ -1,1012 +1,1153 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Attendance Management - HR & Payroll System</title>
-  
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <!-- AOS CSS -->
-  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-  
-  <!-- Supabase JS CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
-  <!-- GSAP CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-
-  <style>
-    /* Custom Scrollbar for Smooth Table Scrolling */
-    .custom-scrollbar::-webkit-scrollbar {
-      height: 6px;
-      width: 6px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: #f1f5f9;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 4px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
-    /* Skeleton Animation */
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
-    .animate-pulse-fast {
-      animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR & Payroll — Attendance Module</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- AOS Animation Library -->
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <!-- GSAP Animation Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col md:flex-row">
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen">
 
-  <!-- ==================== SIDEBAR ==================== -->
-  <aside id="sidebar" class="bg-slate-900 text-slate-300 w-full md:w-64 flex-shrink-0 md:min-h-screen flex flex-col justify-between transition-all duration-300 z-30">
-    <div>
-      <!-- Brand Logo -->
-      <div class="h-16 flex items-center px-6 bg-slate-950 border-b border-slate-800">
-        <i class="fa-solid fa-users-gear text-indigo-500 text-2xl mr-3"></i>
-        <span class="font-bold text-lg text-white tracking-wide">HR & Payroll</span>
-      </div>
-
-      <!-- Navigation Links -->
-      <nav class="p-4 space-y-1.5">
-        <a href="index.html" class="flex items-center px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-          <i class="fa-solid fa-chart-line w-6"></i>
-          <span class="font-medium">Dashboard</span>
-        </a>
-        <a href="employees.html" class="flex items-center px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-          <i class="fa-solid fa-id-card w-6"></i>
-          <span class="font-medium">Employees</span>
-        </a>
-        <!-- Highlighted Attendance Sidebar Item -->
-        <a href="attendance.html" class="flex items-center px-4 py-3 rounded-lg bg-indigo-600 text-white font-medium shadow-md transition-colors">
-          <i class="fa-solid fa-clock-rotate-left w-6"></i>
-          <span>Attendance</span>
-        </a>
-      </nav>
-    </div>
-
-    <!-- Sidebar Footer -->
-    <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">
-      &copy; 2026 HR & Payroll System
-    </div>
-  </aside>
-
-  <!-- ==================== MAIN CONTENT ==================== -->
-  <div class="flex-1 flex flex-col min-w-0 min-h-screen">
-
-    <!-- Top Header -->
-    <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-20 shadow-sm">
-      <div class="flex items-center space-x-3">
-        <h1 class="text-xl font-bold text-slate-800">Attendance Management</h1>
-      </div>
-      <div class="flex items-center space-x-4">
-        <button id="btn-open-modal" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium text-sm flex items-center shadow-sm transition-colors">
-          <i class="fa-solid fa-plus mr-2"></i> Record Attendance
-        </button>
-      </div>
-    </header>
-
-    <!-- Content Body -->
-    <main class="p-6 space-y-6 flex-1 overflow-y-auto">
-
-      <!-- ==================== SUMMARY CARDS ==================== -->
-      <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4" data-aos="fade-up">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         
-        <!-- Total Records -->
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Records</p>
-          <p id="stat-total" class="text-2xl font-extrabold text-slate-900 mt-2">--</p>
+        <!-- HEADER -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4" data-aos="fade-down">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900">Attendance Monitoring</h1>
+                <p class="text-xs sm:text-sm text-slate-500">Track and manage employee daily time records and attendance status.</p>
+            </div>
+            <div>
+                <button type="button" id="btn-open-modal" class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2.5 rounded-lg shadow-sm transition-all duration-150">
+                    <i class="fa-solid fa-plus"></i> Record Attendance
+                </button>
+            </div>
         </div>
 
-        <!-- Present -->
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-emerald-500">
-          <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Present</p>
-          <p id="stat-present" class="text-2xl font-extrabold text-emerald-600 mt-2">--</p>
+        <!-- SUMMARY CARDS -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3" data-aos="fade-up">
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Total Logs</span>
+                <span id="stat-total" class="text-xl font-extrabold text-slate-800 mt-1 block">0</span>
+            </div>
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                <span class="text-xs font-semibold text-emerald-600 uppercase tracking-wider block">Present</span>
+                <span id="stat-present" class="text-xl font-extrabold text-emerald-600 mt-1 block">0</span>
+            </div>
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                <span class="text-xs font-semibold text-amber-600 uppercase tracking-wider block">Late</span>
+                <span id="stat-late" class="text-xl font-extrabold text-amber-600 mt-1 block">0</span>
+            </div>
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                <span class="text-xs font-semibold text-rose-600 uppercase tracking-wider block">Absent</span>
+                <span id="stat-absent" class="text-xl font-extrabold text-rose-600 mt-1 block">0</span>
+            </div>
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                <span class="text-xs font-semibold text-blue-600 uppercase tracking-wider block">On Leave</span>
+                <span id="stat-leave" class="text-xl font-extrabold text-blue-600 mt-1 block">0</span>
+            </div>
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                <span class="text-xs font-semibold text-orange-600 uppercase tracking-wider block">Undertime</span>
+                <span id="stat-undertime" class="text-xl font-extrabold text-orange-600 mt-1 block">0</span>
+            </div>
         </div>
 
-        <!-- Late -->
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-amber-500">
-          <p class="text-xs font-semibold text-amber-600 uppercase tracking-wider">Late</p>
-          <p id="stat-late" class="text-2xl font-extrabold text-amber-600 mt-2">--</p>
+        <!-- FILTERS BAR -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3" data-aos="fade-up" data-aos-delay="100">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+                <div>
+                    <label for="filter-search" class="block text-xs font-medium text-slate-500 mb-1">Search Employee</label>
+                    <input type="text" id="filter-search" placeholder="Name or ID..." class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+                <div>
+                    <label for="filter-dept" class="block text-xs font-medium text-slate-500 mb-1">Department</label>
+                    <select id="filter-dept" class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                        <option value="">All Departments</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="filter-status" class="block text-xs font-medium text-slate-500 mb-1">Status</label>
+                    <select id="filter-status" class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                        <option value="">All Statuses</option>
+                        <option value="PRESENT">Present</option>
+                        <option value="LATE">Late</option>
+                        <option value="ABSENT">Absent</option>
+                        <option value="UNDERTIME">Undertime</option>
+                        <option value="ON_LEAVE">On Leave</option>
+                        <option value="REST_DAY">Rest Day</option>
+                        <option value="HOLIDAY">Holiday</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="filter-date-from" class="block text-xs font-medium text-slate-500 mb-1">From Date</label>
+                    <input type="date" id="filter-date-from" class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                </div>
+                <div>
+                    <label for="filter-date-to" class="block text-xs font-medium text-slate-500 mb-1">To Date</label>
+                    <input type="date" id="filter-date-to" class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                </div>
+            </div>
+            <div class="flex justify-end pt-1">
+                <button type="button" id="btn-clear-filters" class="text-xs text-slate-500 hover:text-rose-600 font-medium inline-flex items-center gap-1 transition-colors">
+                    <i class="fa-solid fa-rotate-left"></i> Reset Filters
+                </button>
+            </div>
         </div>
 
-        <!-- Absent -->
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-rose-500">
-          <p class="text-xs font-semibold text-rose-600 uppercase tracking-wider">Absent</p>
-          <p id="stat-absent" class="text-2xl font-extrabold text-rose-600 mt-2">--</p>
+        <!-- TABLE SECTION -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden" data-aos="fade-up" data-aos-delay="200">
+            <!-- Loading Indicator -->
+            <div id="table-loading" class="hidden py-4 text-center bg-indigo-50/50 border-b border-indigo-100">
+                <span class="text-xs font-semibold text-indigo-600 inline-flex items-center gap-2">
+                    <i class="fa-solid fa-circle-notch fa-spin"></i> Fetching attendance records...
+                </span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-600">
+                    <thead class="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200">
+                        <tr>
+                            <th class="py-3 px-4">Date</th>
+                            <th class="py-3 px-4">Emp No.</th>
+                            <th class="py-3 px-4">Employee Name</th>
+                            <th class="py-3 px-4">Department</th>
+                            <th class="py-3 px-4">Time In</th>
+                            <th class="py-3 px-4">Time Out</th>
+                            <th class="py-3 px-4">Status</th>
+                            <th class="py-3 px-4">Late (m)</th>
+                            <th class="py-3 px-4">Undertime (m)</th>
+                            <th class="py-3 px-4">OT (h)</th>
+                            <th class="py-3 px-4 text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendance-tbody" class="divide-y divide-slate-100">
+                        <!-- Table content dynamically injected via JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- PAGINATION -->
+            <div class="px-4 py-3 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                <div id="pagination-info" class="text-slate-500">
+                    Showing 0–0 of 0 records
+                </div>
+                <div id="pagination-controls" class="flex items-center space-x-1">
+                    <!-- Pagination buttons rendered via JS -->
+                </div>
+            </div>
         </div>
-
-        <!-- On Leave -->
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-blue-500">
-          <p class="text-xs font-semibold text-blue-600 uppercase tracking-wider">On Leave</p>
-          <p id="stat-leave" class="text-2xl font-extrabold text-blue-600 mt-2">--</p>
-        </div>
-
-        <!-- Undertime -->
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-orange-500">
-          <p class="text-xs font-semibold text-orange-600 uppercase tracking-wider">Undertime</p>
-          <p id="stat-undertime" class="text-2xl font-extrabold text-orange-600 mt-2">--</p>
-        </div>
-
-      </section>
-
-      <!-- ==================== FILTER BAR ==================== -->
-      <section class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-4 lg:space-y-0" data-aos="fade-up" data-aos-delay="100">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
-          
-          <!-- Search -->
-          <div class="lg:col-span-2 relative">
-            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-            <input type="text" id="filter-search" placeholder="Search employee name or #" class="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
-          </div>
-
-          <!-- Date From -->
-          <div>
-            <input type="date" id="filter-date-from" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none">
-          </div>
-
-          <!-- Date To -->
-          <div>
-            <input type="date" id="filter-date-to" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none">
-          </div>
-
-          <!-- Department Dropdown -->
-          <div>
-            <select id="filter-dept" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none">
-              <option value="">All Departments</option>
-            </select>
-          </div>
-
-          <!-- Status Dropdown -->
-          <div class="flex space-x-2">
-            <select id="filter-status" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none">
-              <option value="">All Statuses</option>
-              <option value="PRESENT">PRESENT</option>
-              <option value="LATE">LATE</option>
-              <option value="ABSENT">ABSENT</option>
-              <option value="ON_LEAVE">ON_LEAVE</option>
-              <option value="UNDERTIME">UNDERTIME</option>
-            </select>
-
-            <button id="btn-clear-filters" title="Clear Filters" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-sm transition-colors">
-              <i class="fa-solid fa-rotate-right"></i>
-            </button>
-          </div>
-
-        </div>
-      </section>
-
-      <!-- ==================== ATTENDANCE TABLE ==================== -->
-      <section class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden" data-aos="fade-up" data-aos-delay="200">
-        <div class="overflow-x-auto custom-scrollbar">
-          <table class="w-full text-left text-sm text-slate-600">
-            <thead class="bg-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">
-              <tr>
-                <th class="py-3.5 px-4">Date</th>
-                <th class="py-3.5 px-4">Emp #</th>
-                <th class="py-3.5 px-4">Employee Name</th>
-                <th class="py-3.5 px-4">Department</th>
-                <th class="py-3.5 px-4">Time In</th>
-                <th class="py-3.5 px-4">Time Out</th>
-                <th class="py-3.5 px-4">Status</th>
-                <th class="py-3.5 px-4">Late (m)</th>
-                <th class="py-3.5 px-4">Undertime (m)</th>
-                <th class="py-3.5 px-4">OT (h)</th>
-                <th class="py-3.5 px-4 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="attendance-tbody" class="divide-y divide-slate-200">
-              <!-- Rendered dynamically -->
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Pagination -->
-        <div class="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span id="pagination-info" class="text-xs text-slate-500">Showing 0–0 of 0 records</span>
-          <div class="flex items-center space-x-1" id="pagination-controls">
-            <!-- Dynamic page buttons -->
-          </div>
-        </div>
-      </section>
-
-    </main>
-  </div>
-
-  <!-- ==================== RECORD/EDIT MODAL ==================== -->
-  <div id="modal-attendance" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 opacity-0 pointer-events-none transition-opacity">
-    <div id="modal-container" class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden transform scale-95 transition-transform">
-      <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
-        <h3 id="modal-title" class="font-bold text-slate-800">Record Attendance</h3>
-        <button id="btn-close-modal" class="text-slate-400 hover:text-slate-600 text-lg">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <form id="attendance-form" class="p-6 space-y-4">
-        <input type="hidden" id="form-attendance-id">
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Employee *</label>
-          <select id="form-employee" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-            <option value="">Select Employee</option>
-          </select>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Attendance Date *</label>
-            <input type="date" id="form-date" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Status *</label>
-            <select id="form-status" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-              <option value="PRESENT">PRESENT</option>
-              <option value="LATE">LATE</option>
-              <option value="ABSENT">ABSENT</option>
-              <option value="ON_LEAVE">ON_LEAVE</option>
-              <option value="UNDERTIME">UNDERTIME</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Time In</label>
-            <input type="time" id="form-time-in" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Time Out</label>
-            <input type="time" id="form-time-out" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-          </div>
-        </div>
-
-        <div class="grid grid-cols-3 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Late (mins)</label>
-            <input type="number" id="form-late" min="0" value="0" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Undertime (m)</label>
-            <input type="number" id="form-undertime" min="0" value="0" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">OT (hrs)</label>
-            <input type="number" step="0.5" id="form-ot" min="0" value="0" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Remarks</label>
-          <textarea id="form-remarks" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none resize-none" placeholder="Optional notes..."></textarea>
-        </div>
-
-        <div class="pt-4 border-t border-slate-200 flex justify-end space-x-3">
-          <button type="button" id="btn-cancel-modal" class="px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">Cancel</button>
-          <button type="submit" id="btn-save-attendance" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium shadow-sm transition-colors">Save</button>
-        </div>
-      </form>
     </div>
-  </div>
 
-  <!-- ==================== DETAILS DRAWER ==================== -->
-  <div id="drawer-details" class="fixed inset-0 z-50 pointer-events-none">
-    <div id="drawer-backdrop" class="absolute inset-0 bg-slate-900/40 opacity-0 transition-opacity duration-300"></div>
-    <div id="drawer-panel" class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl p-6 transform translate-x-full transition-transform duration-300 ease-in-out pointer-events-auto flex flex-col justify-between">
-      <div>
-        <div class="flex justify-between items-center border-b border-slate-200 pb-4 mb-6">
-          <h3 class="font-bold text-slate-800 text-lg">Attendance Details</h3>
-          <button id="btn-close-drawer" class="text-slate-400 hover:text-slate-600 text-lg">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
+    <!-- RECORD/EDIT ATTENDANCE MODAL -->
+    <div id="modal-attendance" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-200">
+        <div id="modal-container" class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden transform scale-95 transition-transform duration-200">
+            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                <h3 id="modal-title" class="text-base font-bold text-slate-800">Record Attendance</h3>
+                <button type="button" id="btn-close-modal" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <form id="attendance-form" class="p-6 space-y-4">
+                <input type="hidden" id="form-attendance-id">
+                
+                <div>
+                    <label for="form-employee" class="block text-xs font-semibold text-slate-600 mb-1">Employee *</label>
+                    <select id="form-employee" required class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                        <option value="">Select Employee</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label for="form-date" class="block text-xs font-semibold text-slate-600 mb-1">Date *</label>
+                        <input type="date" id="form-date" required class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="form-status" class="block text-xs font-semibold text-slate-600 mb-1">Status *</label>
+                        <select id="form-status" required class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                            <option value="PRESENT">Present</option>
+                            <option value="LATE">Late</option>
+                            <option value="ABSENT">Absent</option>
+                            <option value="UNDERTIME">Undertime</option>
+                            <option value="ON_LEAVE">On Leave</option>
+                            <option value="REST_DAY">Rest Day</option>
+                            <option value="HOLIDAY">Holiday</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label for="form-time-in" class="block text-xs font-semibold text-slate-600 mb-1">Time In</label>
+                        <input type="time" id="form-time-in" class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="form-time-out" class="block text-xs font-semibold text-slate-600 mb-1">Time Out</label>
+                        <input type="time" id="form-time-out" class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label for="form-late" class="block text-xs font-semibold text-slate-600 mb-1">Late (Minutes)</label>
+                        <input type="number" id="form-late" min="0" value="0" class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="form-undertime" class="block text-xs font-semibold text-slate-600 mb-1">Undertime (Min)</label>
+                        <input type="number" id="form-undertime" min="0" value="0" class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="form-ot" class="block text-xs font-semibold text-slate-600 mb-1">Overtime (Hours)</label>
+                        <input type="number" id="form-ot" step="0.5" min="0" value="0" class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="form-remarks" class="block text-xs font-semibold text-slate-600 mb-1">Remarks</label>
+                    <textarea id="form-remarks" rows="2" placeholder="Optional notes or reasons..." class="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button type="button" id="btn-cancel-modal" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition-colors">
+                        Save Record
+                    </button>
+                </div>
+            </form>
         </div>
-
-        <div id="drawer-content" class="space-y-4">
-          <!-- Populated dynamically -->
-        </div>
-      </div>
-
-      <div class="pt-4 border-t border-slate-200">
-        <button id="btn-drawer-close" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors">Close Drawer</button>
-      </div>
     </div>
-  </div>
 
-  <!-- ==================== TOAST NOTIFICATIONS ==================== -->
-  <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+    <!-- VIEW DETAILS DRAWER -->
+    <div id="drawer-details" class="fixed inset-0 z-50 pointer-events-none">
+        <div id="drawer-backdrop" class="fixed inset-0 bg-slate-900/40 opacity-0 transition-opacity duration-300"></div>
+        <div id="drawer-panel" class="fixed inset-y-0 right-0 max-w-sm w-full bg-white shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col pointer-events-auto">
+            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                <h3 class="text-base font-bold text-slate-800">Attendance Details</h3>
+                <button type="button" id="btn-close-drawer" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div id="drawer-content" class="p-6 flex-1 overflow-y-auto">
+                <!-- Record details populated dynamically -->
+            </div>
+            <div class="p-4 bg-slate-50 border-t border-slate-200">
+                <button type="button" id="btn-drawer-close" class="w-full py-2 text-xs font-semibold bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg transition-colors">
+                    Close Drawer
+                </button>
+            </div>
+        </div>
+    </div>
 
-  <!-- ==================== AOS JS ==================== -->
-  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <!-- SCRIPT MODULE -->
+    <script>
+    /* ============================================================
+       HR & PAYROLL — ATTENDANCE MODULE
+       ============================================================ */
 
-  <!-- ==================== APPLICATION SCRIPT ==================== -->
-  <script>
-    // Initialize AOS
-    AOS.init({ duration: 600, once: true });
+    const ATTENDANCE_PAGE_SIZE = 10;
 
-    // Initialize Supabase Client (Consumes shared client if existing, fallback to anon key)
-    const SUPABASE_URL = window.SUPABASE_URL || 'https://trockfedsoekzdhumpba.supabase.co';
-    const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || 'sb_publishable_5I1FFmkfKxUvOyqOH6ZkZw_oHE8vb1a';
-    const _supabase = window.supabaseClient || supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let attendanceCurrentPage = 1;
+    let attendanceTotalRecords = 0;
+    let attendanceEditingId = null;
 
-    // Global App State
-    let state = {
-      attendanceRecords: [],
-      employees: [],
-      departments: [],
-      detectedColumns: [],
-      filters: {
+    let attendanceFilters = {
         search: '',
         dateFrom: '',
         dateTo: '',
         department: '',
         status: ''
-      },
-      pagination: {
-        currentPage: 1,
-        pageSize: 10,
-        totalRecords: 0
-      }
     };
 
-    // DOM Elements
-    const elements = {
-      tbody: document.getElementById('attendance-tbody'),
-      modal: document.getElementById('modal-attendance'),
-      modalContainer: document.getElementById('modal-container'),
-      modalTitle: document.getElementById('modal-title'),
-      form: document.getElementById('attendance-form'),
-      btnSave: document.getElementById('btn-save-attendance'),
-      drawer: document.getElementById('drawer-details'),
-      drawerBackdrop: document.getElementById('drawer-backdrop'),
-      drawerPanel: document.getElementById('drawer-panel'),
-      drawerContent: document.getElementById('drawer-content'),
-      filterSearch: document.getElementById('filter-search'),
-      filterDateFrom: document.getElementById('filter-date-from'),
-      filterDateTo: document.getElementById('filter-date-to'),
-      filterDept: document.getElementById('filter-dept'),
-      filterStatus: document.getElementById('filter-status'),
-      btnClearFilters: document.getElementById('btn-clear-filters'),
-      paginationInfo: document.getElementById('pagination-info'),
-      paginationControls: document.getElementById('pagination-controls')
-    };
+    // Ensure Supabase Client is resolved
+    const _client = window.supabaseClient || window._supabase || (typeof supabase !== 'undefined' ? supabase.createClient(window.SUPABASE_URL || 'https://trockfedsoekzdhumpba.supabase.co', window.SUPABASE_ANON_KEY || 'sb_publishable_5I1FFmkfKxUvOyqOH6ZkZw_oHE8vb1a') : null);
 
-    // On Page Load
-    document.addEventListener('DOMContentLoaded', async () => {
-      await inspectAttendanceColumns();
-      await Promise.all([loadDepartments(), loadEmployees()]);
-      await refreshData();
-      attachEventListeners();
-    });
 
-    /* ==========================================
-       DATABASE COLUMN INSPECTION (Strict Compliance)
-       ========================================== */
-    async function inspectAttendanceColumns() {
-      try {
-        const { data, error } = await _supabase.from('attendance').select('*').limit(1);
-        if (!error && data && data.length > 0) {
-          state.detectedColumns = Object.keys(data[0]);
+    /* ============================================================
+       BASIC HELPERS
+       ============================================================ */
+
+    function escapeHtml(value) {
+        if (value === null || value === undefined) {
+            return '';
+        }
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+
+    /* ============================================================
+       PHILIPPINE DATE/TIME
+       ============================================================ */
+
+    function formatPhilippineDate(value) {
+        if (!value) return '—';
+        try {
+            const date = new Date(`${value}T00:00:00+08:00`);
+            return new Intl.DateTimeFormat('en-PH', {
+                year: 'numeric',
+                month: 'short',
+                day: '2-digit',
+                timeZone: 'Asia/Manila'
+            }).format(date);
+        } catch (error) {
+            return value;
+        }
+    }
+
+    function formatPhilippineTime(value) {
+        if (!value) return '—';
+        try {
+            if (!value.includes('T')) {
+                const today = new Date().toISOString().split('T')[0];
+                value = `${today}T${value}+08:00`;
+            }
+            return new Intl.DateTimeFormat('en-PH', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+                timeZone: 'Asia/Manila'
+            }).format(new Date(value));
+        } catch (error) {
+            return '—';
+        }
+    }
+
+    function formatNumber(value, decimals = 0) {
+        return Number(value || 0).toLocaleString('en-PH', {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals
+        });
+    }
+
+
+    /* ============================================================
+       LOADING STATE
+       ============================================================ */
+
+    function setAttendanceLoading(isLoading) {
+        const loading = document.getElementById('table-loading');
+        if (loading) {
+            loading.classList.toggle('hidden', !isLoading);
+        }
+    }
+
+
+    /* ============================================================
+       STATUS BADGES
+       ============================================================ */
+
+    function attendanceStatusBadge(status) {
+        const statusMap = {
+            PRESENT: { label: 'Present', className: 'bg-emerald-100 text-emerald-800 border border-emerald-200' },
+            ABSENT: { label: 'Absent', className: 'bg-rose-100 text-rose-800 border border-rose-200' },
+            LATE: { label: 'Late', className: 'bg-amber-100 text-amber-800 border border-amber-200' },
+            UNDERTIME: { label: 'Undertime', className: 'bg-orange-100 text-orange-800 border border-orange-200' },
+            ON_LEAVE: { label: 'On Leave', className: 'bg-blue-100 text-blue-800 border border-blue-200' },
+            REST_DAY: { label: 'Rest Day', className: 'bg-slate-100 text-slate-700' },
+            HOLIDAY: { label: 'Holiday', className: 'bg-purple-100 text-purple-700' }
+        };
+
+        const config = statusMap[status] || {
+            label: status || 'Unknown',
+            className: 'bg-gray-100 text-gray-700'
+        };
+
+        return `
+            <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${config.className}">
+                ${escapeHtml(config.label)}
+            </span>
+        `;
+    }
+
+
+    /* ============================================================
+       LOAD DEPARTMENTS
+       ============================================================ */
+
+    async function loadAttendanceDepartments() {
+        const select = document.getElementById('filter-dept') || document.getElementById('department-filter') || document.getElementById('filter-department');
+        if (!select) return;
+
+        const { data, error } = await _client
+            .from('departments')
+            .select(`id, department_code, department_name, name`)
+            .order('department_name', { ascending: true });
+
+        if (error) {
+            console.error('Department loading error:', error);
+            return;
+        }
+
+        select.innerHTML = `<option value="">All Departments</option>`;
+        (data || []).forEach(department => {
+            const deptName = department.department_name || department.name || 'Unnamed Department';
+            select.insertAdjacentHTML('beforeend', `
+                <option value="${escapeHtml(department.id)}">
+                    ${escapeHtml(deptName)}
+                </option>
+            `);
+        });
+    }
+
+
+    /* ============================================================
+       LOAD EMPLOYEES
+       ============================================================ */
+
+    async function loadAttendanceEmployees() {
+        const select = document.getElementById('form-employee') || document.getElementById('employee-id') || document.getElementById('employee_id');
+        if (!select) return;
+
+        const { data, error } = await _client
+            .from('vw_employee_directory')
+            .select(`id, employee_number, full_name, first_name, last_name`);
+
+        if (error) {
+            console.error('Employee loading error:', error);
+            return;
+        }
+
+        select.innerHTML = `<option value="">Select Employee</option>`;
+        (data || []).forEach(employee => {
+            const empName = employee.full_name || `${employee.first_name || ''} ${employee.last_name || ''}`.trim();
+            const empNum = employee.employee_number || employee.id;
+            select.insertAdjacentHTML('beforeend', `
+                <option value="${escapeHtml(employee.id)}">
+                    ${escapeHtml(empNum)} — ${escapeHtml(empName)}
+                </option>
+            `);
+        });
+    }
+
+
+    /* ============================================================
+       BUILD ATTENDANCE QUERY
+       ============================================================ */
+
+    function buildAttendanceQuery() {
+        let query = _client
+            .from('attendance')
+            .select(`
+                id,
+                employee_id,
+                attendance_date,
+                time_in,
+                time_out,
+                overtime_hours,
+                late_minutes,
+                undertime_minutes,
+                status,
+                remarks
+            `, { count: 'exact' });
+
+        if (attendanceFilters.dateFrom) {
+            query = query.gte('attendance_date', attendanceFilters.dateFrom);
+        }
+        if (attendanceFilters.dateTo) {
+            query = query.lte('attendance_date', attendanceFilters.dateTo);
+        }
+        if (attendanceFilters.status) {
+            query = query.eq('status', attendanceFilters.status);
+        }
+
+        return query;
+    }
+
+
+    /* ============================================================
+       LOAD ATTENDANCE
+       ============================================================ */
+
+    async function loadAttendanceRecords() {
+        setAttendanceLoading(true);
+
+        try {
+            const from = (attendanceCurrentPage - 1) * ATTENDANCE_PAGE_SIZE;
+            const to = from + ATTENDANCE_PAGE_SIZE - 1;
+
+            let query = buildAttendanceQuery()
+                .order('attendance_date', { ascending: false })
+                .range(from, to);
+
+            const { data, error, count } = await query;
+            if (error) throw error;
+
+            // Fetch Employee Directory View data to manual join
+            const { data: dirData } = await _client.from('vw_employee_directory').select('*');
+            const empMap = new Map((dirData || []).map(e => [String(e.id || e.employee_id), e]));
+
+            let records = (data || []).map(att => {
+                const emp = empMap.get(String(att.employee_id)) || {};
+                return {
+                    ...att,
+                    employee: {
+                        id: att.employee_id,
+                        employee_number: emp.employee_number || emp.emp_no || '--',
+                        full_name: emp.full_name || `${emp.first_name || ''} ${emp.last_name || ''}`.trim() || 'Unknown Employee',
+                        department_id: emp.department_id || emp.department,
+                        department: {
+                            department_name: emp.department_name || emp.department || '--'
+                        }
+                    }
+                };
+            });
+
+            // Client search filter if provided
+            if (attendanceFilters.search) {
+                const term = attendanceFilters.search.toLowerCase();
+                records = records.filter(r => 
+                    r.employee.full_name.toLowerCase().includes(term) || 
+                    r.employee.employee_number.toLowerCase().includes(term)
+                );
+            }
+
+            // Client department filter if provided
+            if (attendanceFilters.department) {
+                records = records.filter(r => 
+                    String(r.employee.department_id) === String(attendanceFilters.department) || 
+                    r.employee.department.department_name === attendanceFilters.department
+                );
+            }
+
+            attendanceTotalRecords = count || records.length;
+            renderAttendanceTable(records);
+            renderAttendancePagination();
+
+        } catch (error) {
+            console.error('Attendance query error:', error);
+            renderAttendanceTable([]);
+            const tbody = document.getElementById('attendance-tbody') || document.getElementById('attendance-table-body');
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="11" class="px-6 py-12 text-center">
+                            <div class="text-rose-500 font-medium">Unable to load attendance records.</div>
+                            <div class="mt-2 text-xs text-slate-400">${escapeHtml(error.message || 'Unknown error')}</div>
+                        </td>
+                    </tr>
+                `;
+            }
+        } font-medium {
+            setAttendanceLoading(false);
+        }
+    }
+
+
+    /* ============================================================
+       RENDER TABLE
+       ============================================================ */
+
+    function renderAttendanceTable(records) {
+        const tbody = document.getElementById('attendance-tbody') || document.getElementById('attendance-table-body');
+        if (!tbody) return;
+
+        if (!records || records.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="11" class="px-6 py-12 text-center text-slate-400">
+                        <i class="fa-regular fa-folder-open text-3xl mb-2 block"></i>
+                        No attendance records found.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        tbody.innerHTML = records.map(record => {
+            const employee = record.employee || {};
+            const department = employee.department || {};
+
+            return `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="py-3.5 px-4 font-medium text-slate-700">${escapeHtml(formatPhilippineDate(record.attendance_date))}</td>
+                    <td class="py-3.5 px-4 text-xs font-mono text-slate-500">${escapeHtml(employee.employee_number)}</td>
+                    <td class="py-3.5 px-4 font-semibold text-slate-800">${escapeHtml(employee.full_name)}</td>
+                    <td class="py-3.5 px-4 text-slate-600">${escapeHtml(department.department_name)}</td>
+                    <td class="py-3.5 px-4 text-slate-600">${escapeHtml(formatPhilippineTime(record.time_in))}</td>
+                    <td class="py-3.5 px-4 text-slate-600">${escapeHtml(formatPhilippineTime(record.time_out))}</td>
+                    <td class="py-3.5 px-4">${attendanceStatusBadge(record.status)}</td>
+                    <td class="py-3.5 px-4 text-slate-600">${formatNumber(record.late_minutes)}</td>
+                    <td class="py-3.5 px-4 text-slate-600">${formatNumber(record.undertime_minutes)}</td>
+                    <td class="py-3.5 px-4 text-slate-600">${formatNumber(record.overtime_hours, 1)}</td>
+                    <td class="py-3.5 px-4 text-center">
+                        <div class="inline-flex items-center space-x-2">
+                            <button type="button" onclick="viewAttendance('${record.id}')" title="View Details" class="text-slate-400 hover:text-indigo-600 p-1 transition-colors">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                            <button type="button" onclick="editAttendance('${record.id}')" title="Edit" class="text-slate-400 hover:text-amber-600 p-1 transition-colors">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button type="button" onclick="deleteAttendance('${record.id}')" title="Delete" class="text-slate-400 hover:text-rose-600 p-1 transition-colors">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        if (typeof gsap !== 'undefined') {
+            gsap.fromTo('#attendance-tbody tr', { opacity: 0, y: 5 }, { opacity: 1, y: 0, duration: 0.25, stagger: 0.03 });
+        }
+    }
+
+
+    /* ============================================================
+       PAGINATION
+       ============================================================ */
+
+    function renderAttendancePagination() {
+        const container = document.getElementById('pagination-controls') || document.getElementById('pagination');
+        const infoContainer = document.getElementById('pagination-info');
+
+        const totalPages = Math.ceil(attendanceTotalRecords / ATTENDANCE_PAGE_SIZE);
+
+        const start = attendanceTotalRecords === 0 ? 0 : ((attendanceCurrentPage - 1) * ATTENDANCE_PAGE_SIZE) + 1;
+        const end = Math.min(attendanceCurrentPage * ATTENDANCE_PAGE_SIZE, attendanceTotalRecords);
+
+        if (infoContainer) {
+            infoContainer.innerText = `Showing ${formatNumber(start)}–${formatNumber(end)} of ${formatNumber(attendanceTotalRecords)} records`;
+        }
+
+        if (!container || attendanceTotalRecords === 0 || totalPages <= 1) {
+            if (container) container.innerHTML = '';
+            return;
+        }
+
+        let html = `
+            <button type="button" onclick="changeAttendancePage(${attendanceCurrentPage - 1})" ${attendanceCurrentPage <= 1 ? 'disabled class="opacity-40 cursor-not-allowed px-2.5 py-1 text-xs border rounded"' : 'class="px-2.5 py-1 text-xs border rounded hover:bg-slate-100"'}>
+                Prev
+            </button>
+        `;
+
+        for (let page = 1; page <= totalPages; page++) {
+            if (page === attendanceCurrentPage) {
+                html += `<button class="px-2.5 py-1 text-xs border rounded bg-indigo-600 text-white font-bold">${page}</button>`;
+            } else if (page === 1 || page === totalPages || Math.abs(page - attendanceCurrentPage) <= 1) {
+                html += `<button type="button" onclick="changeAttendancePage(${page})" class="px-2.5 py-1 text-xs border rounded hover:bg-slate-100">${page}</button>`;
+            }
+        }
+
+        html += `
+            <button type="button" onclick="changeAttendancePage(${attendanceCurrentPage + 1})" ${attendanceCurrentPage >= totalPages ? 'disabled class="opacity-40 cursor-not-allowed px-2.5 py-1 text-xs border rounded"' : 'class="px-2.5 py-1 text-xs border rounded hover:bg-slate-100"'}>
+                Next
+            </button>
+        `;
+
+        container.innerHTML = html;
+    }
+
+    function changeAttendancePage(page) {
+        const totalPages = Math.ceil(attendanceTotalRecords / ATTENDANCE_PAGE_SIZE);
+        if (page < 1 || page > totalPages) return;
+        attendanceCurrentPage = page;
+        loadAttendanceRecords();
+    }
+
+
+    /* ============================================================
+       SUMMARY COUNTS
+       ============================================================ */
+
+    async function getAttendanceCount(status = null) {
+        let query = _client.from('attendance').select('id', { count: 'exact', head: true });
+
+        if (attendanceFilters.dateFrom) {
+            query = query.gte('attendance_date', attendanceFilters.dateFrom);
+        }
+        if (attendanceFilters.dateTo) {
+            query = query.lte('attendance_date', attendanceFilters.dateTo);
+        }
+        if (status) {
+            query = query.eq('status', status);
+        }
+
+        const { count, error } = await query;
+        if (error) {
+            console.error('Count error:', error);
+            return 0;
+        }
+        return count || 0;
+    }
+
+    async function loadAttendanceSummary() {
+        try {
+            const [total, present, late, absent, onLeave, undertime] = await Promise.all([
+                getAttendanceCount(),
+                getAttendanceCount('PRESENT'),
+                getAttendanceCount('LATE'),
+                getAttendanceCount('ABSENT'),
+                getAttendanceCount('ON_LEAVE'),
+                getAttendanceCount('UNDERTIME')
+            ]);
+
+            updateAttendanceStat('stat-total', total);
+            updateAttendanceStat('stat-present', present);
+            updateAttendanceStat('stat-late', late);
+            updateAttendanceStat('stat-absent', absent);
+            updateAttendanceStat('stat-leave', onLeave);
+            updateAttendanceStat('stat-undertime', undertime);
+        } catch (error) {
+            console.error('Attendance summary error:', error);
+        }
+    }
+
+    function updateAttendanceStat(elementId, value) {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+
+        if (typeof gsap !== 'undefined') {
+            const counter = { value: parseInt(element.textContent) || 0 };
+            gsap.to(counter, {
+                value: Number(value || 0),
+                duration: 0.7,
+                ease: 'power2.out',
+                onUpdate: () => {
+                    element.textContent = Math.round(counter.value).toLocaleString('en-PH');
+                }
+            });
         } else {
-          // Fallback standard columns based on table design
-          state.detectedColumns = ['id', 'employee_id', 'attendance_date', 'time_in', 'time_out', 'status', 'late_minutes', 'undertime_minutes', 'overtime_hours', 'remarks'];
+            element.textContent = Number(value || 0).toLocaleString('en-PH');
         }
-      } catch (err) {
-        console.warn('Could not inspect schema, relying on default mapping:', err);
-      }
     }
 
-    // Dynamic key resolver matching detected DB column names
-    function getColName(possibleNames) {
-      for (const name of possibleNames) {
-        if (state.detectedColumns.includes(name)) return name;
-      }
-      return possibleNames[0]; // fallback to primary guess
+
+    /* ============================================================
+       APPLY & CLEAR FILTERS
+       ============================================================ */
+
+    function applyAttendanceFilters() {
+        const search = document.getElementById('filter-search') || document.getElementById('search-employee');
+        const dateFrom = document.getElementById('filter-date-from') || document.getElementById('date-from');
+        const dateTo = document.getElementById('filter-date-to') || document.getElementById('date-to');
+        const department = document.getElementById('filter-dept') || document.getElementById('department-filter');
+        const status = document.getElementById('filter-status') || document.getElementById('status-filter');
+
+        attendanceFilters = {
+            search: search?.value?.trim() || '',
+            dateFrom: dateFrom?.value || '',
+            dateTo: dateTo?.value || '',
+            department: department?.value || '',
+            status: status?.value || ''
+        };
+
+        attendanceCurrentPage = 1;
+        Promise.all([loadAttendanceRecords(), loadAttendanceSummary()]);
     }
 
-    /* ==========================================
-       DATA LOADING & FETCHING
-       ========================================== */
-    async function refreshData() {
-      renderSkeletons();
-      await fetchAttendance();
-      calculateSummaryStats();
-    }
-
-    async function loadDepartments() {
-      try {
-        const { data, error } = await _supabase.from('departments').select('*');
-        if (!error && data) {
-          state.departments = data;
-          elements.filterDept.innerHTML = `<option value="">All Departments</option>` +
-            data.map(d => `<option value="${d.id || d.name}">${d.name || d.department_name}</option>`).join('');
-        }
-      } catch (e) {
-        console.error('Error loading departments:', e);
-      }
-    }
-
-    async function loadEmployees() {
-      try {
-        const { data, error } = await _supabase.from('vw_employee_directory').select('*');
-        if (!error && data) {
-          state.employees = data;
-          const select = document.getElementById('form-employee');
-          select.innerHTML = `<option value="">Select Employee</option>` +
-            data.map(emp => {
-              const empNum = emp.employee_number || emp.emp_no || emp.id;
-              const name = getEmpFullName(emp);
-              return `<option value="${emp.id || emp.employee_id}">${empNum} - ${name}</option>`;
-            }).join('');
-        }
-      } catch (e) {
-        console.error('Error loading employees:', e);
-      }
-    }
-
-    async function fetchAttendance() {
-      try {
-        // Query attendance and join with employee directory view
-        let query = _supabase.from('attendance').select(`*`, { count: 'exact' });
-
-        const { data: rawAttendance, error } = await query;
-        if (error) throw error;
-
-        // Fetch directory to join manually if Foreign Key mapping isn't directly exposed
-        const { data: dirData } = await _supabase.from('vw_employee_directory').select('*');
-        const empMap = new Map((dirData || []).map(e => [String(e.id || e.employee_id), e]));
-
-        // Normalize and join records
-        let records = (rawAttendance || []).map(att => {
-          const empId = String(att.employee_id || att.emp_id);
-          const emp = empMap.get(empId) || {};
-          return {
-            raw: att,
-            id: att.id,
-            employee_id: empId,
-            employee_number: emp.employee_number || emp.emp_no || '--',
-            employee_name: getEmpFullName(emp),
-            department: emp.department_name || emp.department || '--',
-            department_id: emp.department_id || emp.department,
-            attendance_date: att.attendance_date || att.date,
-            time_in: att.time_in,
-            time_out: att.time_out,
-            status: (att.status || 'PRESENT').toUpperCase(),
-            late_minutes: att.late_minutes || att.late || 0,
-            undertime_minutes: att.undertime_minutes || att.undertime || 0,
-            overtime_hours: att.overtime_hours || att.overtime || 0,
-            remarks: att.remarks || ''
-          };
+    function clearAttendanceFilters() {
+        const ids = ['filter-search', 'search-employee', 'filter-date-from', 'date-from', 'filter-date-to', 'date-to', 'filter-dept', 'department-filter', 'filter-status', 'status-filter'];
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
         });
 
-        // Apply Client-Side Filters
-        records = applyFilters(records);
-        state.attendanceRecords = records;
-        state.pagination.totalRecords = records.length;
-
-        renderTable();
-      } catch (err) {
-        showToast('Unable to fetch attendance records.', 'error');
-        console.error(err);
-      }
+        attendanceFilters = { search: '', dateFrom: '', dateTo: '', department: '', status: '' };
+        attendanceCurrentPage = 1;
+        Promise.all([loadAttendanceRecords(), loadAttendanceSummary()]);
     }
 
-    function applyFilters(records) {
-      return records.filter(r => {
-        // Search
-        if (state.filters.search) {
-          const term = state.filters.search.toLowerCase();
-          const matchName = r.employee_name.toLowerCase().includes(term);
-          const matchNum = r.employee_number.toLowerCase().includes(term);
-          if (!matchName && !matchNum) return false;
+
+    /* ============================================================
+       VIEW ATTENDANCE
+       ============================================================ */
+
+    async function viewAttendance(id) {
+        const { data, error } = await _client.from('attendance').select('*').eq('id', id).single();
+        if (error || !data) {
+            alert('Unable to load attendance record.');
+            return;
         }
-        // Date range
-        if (state.filters.dateFrom && r.attendance_date < state.filters.dateFrom) return false;
-        if (state.filters.dateTo && r.attendance_date > state.filters.dateTo) return false;
-        // Department
-        if (state.filters.department && String(r.department_id) !== String(state.filters.department) && r.department !== state.filters.department) return false;
-        // Status
-        if (state.filters.status && r.status !== state.filters.status) return false;
 
-        return true;
-      });
-    }
+        const { data: empData } = await _client.from('vw_employee_directory').select('*').eq('id', data.employee_id).single();
+        const empName = empData ? (empData.full_name || `${empData.first_name || ''} ${empData.last_name || ''}`.trim()) : 'Unknown Employee';
+        const empNum = empData ? (empData.employee_number || '--') : '--';
+        const deptName = empData ? (empData.department_name || '--') : '--';
 
-    /* ==========================================
-       SUMMARY STATS & GSAP COUNTERS
-       ========================================== */
-    function calculateSummaryStats() {
-      const stats = {
-        total: state.attendanceRecords.length,
-        present: 0,
-        late: 0,
-        absent: 0,
-        leave: 0,
-        undertime: 0
-      };
+        const drawerContent = document.getElementById('drawer-content');
+        const drawer = document.getElementById('drawer-details');
+        const drawerBackdrop = document.getElementById('drawer-backdrop');
+        const drawerPanel = document.getElementById('drawer-panel');
 
-      state.attendanceRecords.forEach(r => {
-        if (r.status === 'PRESENT') stats.present++;
-        else if (r.status === 'LATE') stats.late++;
-        else if (r.status === 'ABSENT') stats.absent++;
-        else if (r.status === 'ON_LEAVE') stats.leave++;
-        else if (r.status === 'UNDERTIME') stats.undertime++;
-      });
-
-      animateCounter('stat-total', stats.total);
-      animateCounter('stat-present', stats.present);
-      animateCounter('stat-late', stats.late);
-      animateCounter('stat-absent', stats.absent);
-      animateCounter('stat-leave', stats.leave);
-      animateCounter('stat-undertime', stats.undertime);
-    }
-
-    function animateCounter(elementId, targetValue) {
-      const el = document.getElementById(elementId);
-      const currentVal = parseInt(el.innerText) || 0;
-      gsap.to({ val: currentVal }, {
-        val: targetValue,
-        duration: 0.8,
-        ease: 'power1.out',
-        onUpdate: function () {
-          el.innerText = Math.round(this.targets()[0].val);
+        if (drawerContent && drawer && drawerPanel) {
+            drawerContent.innerHTML = `
+                <div class="space-y-3 text-sm">
+                  <div>
+                    <span class="text-xs text-slate-400 uppercase font-semibold block">Employee</span>
+                    <span class="text-base font-bold text-slate-800">${escapeHtml(empName)}</span>
+                    <span class="text-xs font-mono text-slate-500 block">(${escapeHtml(empNum)})</span>
+                  </div>
+                  <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
+                    <div>
+                      <span class="text-xs text-slate-400 uppercase font-semibold block">Date</span>
+                      <span class="font-medium text-slate-700">${formatPhilippineDate(data.attendance_date)}</span>
+                    </div>
+                    <div>
+                      <span class="text-xs text-slate-400 uppercase font-semibold block">Department</span>
+                      <span class="font-medium text-slate-700">${escapeHtml(deptName)}</span>
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
+                    <div>
+                      <span class="text-xs text-slate-400 uppercase font-semibold block">Time In</span>
+                      <span class="font-medium text-slate-700">${formatPhilippineTime(data.time_in)}</span>
+                    </div>
+                    <div>
+                      <span class="text-xs text-slate-400 uppercase font-semibold block">Time Out</span>
+                      <span class="font-medium text-slate-700">${formatPhilippineTime(data.time_out)}</span>
+                    </div>
+                  </div>
+                  <div class="pt-2 border-t border-slate-100">
+                    <span class="text-xs text-slate-400 uppercase font-semibold block mb-1">Status</span>
+                    ${attendanceStatusBadge(data.status)}
+                  </div>
+                  <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-center bg-slate-50 p-2 rounded-lg">
+                    <div>
+                      <span class="text-xs text-slate-400 block">Late</span>
+                      <span class="font-semibold text-slate-700">${data.late_minutes || 0} m</span>
+                    </div>
+                    <div>
+                      <span class="text-xs text-slate-400 block">Undertime</span>
+                      <span class="font-semibold text-slate-700">${data.undertime_minutes || 0} m</span>
+                    </div>
+                    <div>
+                      <span class="text-xs text-slate-400 block">Overtime</span>
+                      <span class="font-semibold text-slate-700">${data.overtime_hours || 0} h</span>
+                    </div>
+                  </div>
+                  <div class="pt-2 border-t border-slate-100">
+                    <span class="text-xs text-slate-400 uppercase font-semibold block">Remarks</span>
+                    <p class="text-slate-600 bg-slate-50 p-3 rounded-lg text-xs italic mt-1">${escapeHtml(data.remarks) || 'No remarks provided.'}</p>
+                  </div>
+                </div>
+            `;
+            drawer.classList.remove('pointer-events-none');
+            if (drawerBackdrop) drawerBackdrop.classList.remove('opacity-0');
+            drawerPanel.classList.remove('translate-x-full');
+        } else {
+            alert(`Employee: ${empName}\nDate: ${formatPhilippineDate(data.attendance_date)}\nStatus: ${data.status}`);
         }
-      });
     }
 
-    /* ==========================================
-       UI RENDERING
-       ========================================== */
-    function renderSkeletons() {
-      elements.tbody.innerHTML = Array(5).fill(0).map(() => `
-        <tr class="animate-pulse-fast">
-          <td class="py-3.5 px-4"><div class="h-4 bg-slate-200 rounded w-20"></div></td>
-          <td class="py-3.5 px-4"><div class="h-4 bg-slate-200 rounded w-12"></div></td>
-          <td class="py-3.5 px-4"><div class="h-4 bg-slate-200 rounded w-32"></div></td>
-          <td class="py-3.5 px-4"><div class="h-4 bg-slate-200 rounded w-24"></div></td>
-          <td class="py-3.5 px-4"><div class="h-4 bg-slate-200 rounded w-16"></div></td>
-          <td class="py-3.5 px-4"><div class="h-4 bg-slate-200 rounded w-16"></div></td>
-          <td class="py-3.5 px-4"><div class="h-5 bg-slate-200 rounded-full w-20"></div></td>
-          <td class="py-3.5 px-4"><div class="h-4 bg-slate-200 rounded w-8"></div></td>
-          <td class="py-3.5 px-4"><div class="h-4 bg-slate-200 rounded w-8"></div></td>
-          <td class="py-3.5 px-4"><div class="h-4 bg-slate-200 rounded w-8"></div></td>
-          <td class="py-3.5 px-4"><div class="h-4 bg-slate-200 rounded w-16 mx-auto"></div></td>
-        </tr>
-      `).join('');
-    }
 
-    function renderTable() {
-      const { currentPage, pageSize, totalRecords } = state.pagination;
-      const startIdx = (currentPage - 1) * pageSize;
-      const endIdx = Math.min(startIdx + pageSize, totalRecords);
-      const pageData = state.attendanceRecords.slice(startIdx, endIdx);
+    /* ============================================================
+       EDIT ATTENDANCE
+       ============================================================ */
 
-      if (pageData.length === 0) {
-        elements.tbody.innerHTML = `
-          <tr>
-            <td colspan="11" class="py-12 text-center text-slate-400">
-              <i class="fa-regular fa-folder-open text-3xl mb-2 block"></i>
-              No attendance records found.
-            </td>
-          </tr>`;
-        elements.paginationInfo.innerText = `Showing 0–0 of 0 records`;
-        elements.paginationControls.innerHTML = '';
-        return;
-      }
-
-      elements.tbody.innerHTML = pageData.map(r => `
-        <tr class="hover:bg-slate-50/80 transition-colors">
-          <td class="py-3.5 px-4 font-medium text-slate-700">${formatDisplayDate(r.attendance_date)}</td>
-          <td class="py-3.5 px-4 text-xs font-mono text-slate-500">${r.employee_number}</td>
-          <td class="py-3.5 px-4 font-semibold text-slate-800">${r.employee_name}</td>
-          <td class="py-3.5 px-4 text-slate-600">${r.department}</td>
-          <td class="py-3.5 px-4 text-slate-600">${formatDisplayTime(r.time_in)}</td>
-          <td class="py-3.5 px-4 text-slate-600">${formatDisplayTime(r.time_out)}</td>
-          <td class="py-3.5 px-4">${getStatusBadge(r.status)}</td>
-          <td class="py-3.5 px-4 text-slate-600">${r.late_minutes}</td>
-          <td class="py-3.5 px-4 text-slate-600">${r.undertime_minutes}</td>
-          <td class="py-3.5 px-4 text-slate-600">${r.overtime_hours}</td>
-          <td class="py-3.5 px-4 text-center">
-            <div class="inline-flex items-center space-x-2">
-              <button onclick="viewDetails('${r.id}')" title="View Details" class="text-slate-400 hover:text-indigo-600 p-1 transition-colors">
-                <i class="fa-solid fa-eye"></i>
-              </button>
-              <button onclick="openEditModal('${r.id}')" title="Edit" class="text-slate-400 hover:text-amber-600 p-1 transition-colors">
-                <i class="fa-solid fa-pen-to-square"></i>
-              </button>
-              <button onclick="confirmDelete('${r.id}')" title="Delete" class="text-slate-400 hover:text-rose-600 p-1 transition-colors">
-                <i class="fa-solid fa-trash-can"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
-      `).join('');
-
-      // GSAP Entrance Animation for rows
-      gsap.fromTo('#attendance-tbody tr', { opacity: 0, y: 5 }, { opacity: 1, y: 0, duration: 0.25, stagger: 0.03 });
-
-      // Update Pagination UI
-      elements.paginationInfo.innerText = `Showing ${startIdx + 1}–${endIdx} of ${totalRecords} records`;
-      renderPaginationControls();
-    }
-
-    function renderPaginationControls() {
-      const { currentPage, pageSize, totalRecords } = state.pagination;
-      const totalPages = Math.ceil(totalRecords / pageSize);
-      if (totalPages <= 1) {
-        elements.paginationControls.innerHTML = '';
-        return;
-      }
-
-      let html = `<button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled class="opacity-40 cursor-not-allowed px-2.5 py-1 text-xs border rounded"' : 'class="px-2.5 py-1 text-xs border rounded hover:bg-slate-100"'}>Prev</button>`;
-
-      for (let i = 1; i <= totalPages; i++) {
-        if (i === currentPage) {
-          html += `<button class="px-2.5 py-1 text-xs border rounded bg-indigo-600 text-white font-bold">${i}</button>`;
-        } else if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 1) {
-          html += `<button onclick="changePage(${i})" class="px-2.5 py-1 text-xs border rounded hover:bg-slate-100">${i}</button>`;
+    async function editAttendance(id) {
+        const { data, error } = await _client.from('attendance').select('*').eq('id', id).single();
+        if (error || !data) {
+            alert('Unable to load attendance record.');
+            return;
         }
-      }
 
-      html += `<button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled class="opacity-40 cursor-not-allowed px-2.5 py-1 text-xs border rounded"' : 'class="px-2.5 py-1 text-xs border rounded hover:bg-slate-100"'}>Next</button>`;
+        attendanceEditingId = id;
 
-      elements.paginationControls.innerHTML = html;
+        setAttendanceFormValue(['form-attendance-id'], data.id);
+        setAttendanceFormValue(['form-employee', 'employee-id', 'employee_id'], data.employee_id);
+        setAttendanceFormValue(['form-date', 'attendance-date', 'attendance_date'], data.attendance_date);
+        setAttendanceFormValue(['form-time-in', 'time-in', 'time_in'], data.time_in ? formatTimeForInput(data.time_in) : '');
+        setAttendanceFormValue(['form-time-out', 'time-out', 'time_out'], data.time_out ? formatTimeForInput(data.time_out) : '');
+        setAttendanceFormValue(['form-status', 'status'], data.status);
+        setAttendanceFormValue(['form-ot', 'overtime-hours', 'overtime_hours'], data.overtime_hours);
+        setAttendanceFormValue(['form-late', 'late-minutes', 'late_minutes'], data.late_minutes);
+        setAttendanceFormValue(['form-undertime', 'undertime-minutes', 'undertime_minutes'], data.undertime_minutes);
+        setAttendanceFormValue(['form-remarks', 'remarks'], data.remarks || '');
+
+        const title = document.getElementById('modal-title');
+        if (title) title.innerText = 'Edit Attendance Record';
+
+        openAttendanceModal();
     }
 
-    function changePage(page) {
-      const totalPages = Math.ceil(state.pagination.totalRecords / state.pagination.pageSize);
-      if (page < 1 || page > totalPages) return;
-      state.pagination.currentPage = page;
-      renderTable();
+    function formatTimeForInput(timestamp) {
+        if (!timestamp) return '';
+        if (timestamp.length === 5 && timestamp.includes(':')) return timestamp;
+        try {
+            const date = new Date(timestamp);
+            return new Intl.DateTimeFormat('en-GB', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false,
+                timeZone: 'Asia/Manila'
+            }).format(date);
+        } catch(e) {
+            return '';
+        }
     }
 
-    /* ==========================================
-       MODAL & DRAWER ACTIONS
-       ========================================== */
-    function openCreateModal() {
-      document.getElementById('form-attendance-id').value = '';
-      elements.form.reset();
-      elements.modalTitle.innerText = 'Record Attendance';
-      // Set default date to today
-      document.getElementById('form-date').value = new Date().toISOString().split('T')[0];
-      showModal();
+    function setAttendanceFormValue(ids, value) {
+        for (const id of ids) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.value = value ?? '';
+                return;
+            }
+        }
     }
 
-    function openEditModal(recordId) {
-      const rec = state.attendanceRecords.find(r => String(r.id) === String(recordId));
-      if (!rec) return;
 
-      document.getElementById('form-attendance-id').value = rec.id;
-      document.getElementById('form-employee').value = rec.employee_id;
-      document.getElementById('form-date').value = rec.attendance_date;
-      document.getElementById('form-time-in').value = rec.time_in || '';
-      document.getElementById('form-time-out').value = rec.time_out || '';
-      document.getElementById('form-status').value = rec.status;
-      document.getElementById('form-late').value = rec.late_minutes;
-      document.getElementById('form-undertime').value = rec.undertime_minutes;
-      document.getElementById('form-ot').value = rec.overtime_hours;
-      document.getElementById('form-remarks').value = rec.remarks;
+    /* ============================================================
+       CREATE / UPDATE ATTENDANCE
+       ============================================================ */
 
-      elements.modalTitle.innerText = 'Edit Attendance Record';
-      showModal();
+    async function saveAttendance(event) {
+        if (event) event.preventDefault();
+
+        const recordId = getAttendanceFormValue(['form-attendance-id']) || attendanceEditingId;
+        const employeeId = getAttendanceFormValue(['form-employee', 'employee-id', 'employee_id']);
+        const attendanceDate = getAttendanceFormValue(['form-date', 'attendance-date', 'attendance_date']);
+        const timeIn = getAttendanceFormValue(['form-time-in', 'time-in', 'time_in']);
+        const timeOut = getAttendanceFormValue(['form-time-out', 'time-out', 'time_out']);
+        const status = getAttendanceFormValue(['form-status', 'status']);
+        const overtimeHours = Number(getAttendanceFormValue(['form-ot', 'overtime-hours', 'overtime_hours']) || 0);
+        const lateMinutes = Number(getAttendanceFormValue(['form-late', 'late-minutes', 'late_minutes']) || 0);
+        const undertimeMinutes = Number(getAttendanceFormValue(['form-undertime', 'undertime-minutes', 'undertime_minutes']) || 0);
+        const remarks = getAttendanceFormValue(['form-remarks', 'remarks']);
+
+        if (!employeeId || !attendanceDate || !status) {
+            alert('Please complete Employee, Date and Status.');
+            return;
+        }
+
+        const payload = {
+            employee_id: employeeId,
+            attendance_date: attendanceDate,
+            time_in: timeIn || null,
+            time_out: timeOut || null,
+            overtime_hours: overtimeHours,
+            late_minutes: lateMinutes,
+            undertime_minutes: undertimeMinutes,
+            status: status,
+            remarks: remarks || null
+        };
+
+        try {
+            let dupQuery = _client.from('attendance').select('id').eq('employee_id', employeeId).eq('attendance_date', attendanceDate);
+            if (recordId) {
+                dupQuery = dupQuery.neq('id', recordId);
+            }
+
+            const { data: existing, error: dupError } = await dupQuery;
+            if (dupError) throw dupError;
+
+            if (existing && existing.length > 0) {
+                alert('An attendance record already exists for this employee on this date.');
+                return;
+            }
+
+            let result;
+            if (recordId) {
+                result = await _client.from('attendance').update(payload).eq('id', recordId);
+            } else {
+                result = await _client.from('attendance').insert([payload]);
+            }
+
+            if (result.error) throw result.error;
+
+            alert(recordId ? 'Attendance updated successfully.' : 'Attendance recorded successfully.');
+            attendanceEditingId = null;
+            closeAttendanceModal();
+
+            await Promise.all([loadAttendanceRecords(), loadAttendanceSummary()]);
+
+        } catch (error) {
+            console.error('Save attendance error:', error);
+            alert(error.message || 'Unable to save attendance.');
+        }
     }
 
-    function showModal() {
-      elements.modal.classList.remove('pointer-events-none');
-      gsap.to(elements.modal, { opacity: 1, duration: 0.2 });
-      gsap.to(elements.modalContainer, { scale: 1, duration: 0.25, ease: 'back.out(1.2)' });
+    function getAttendanceFormValue(ids) {
+        for (const id of ids) {
+            const element = document.getElementById(id);
+            if (element) return element.value;
+        }
+        return '';
     }
 
-    function closeModal() {
-      gsap.to(elements.modalContainer, { scale: 0.95, duration: 0.15 });
-      gsap.to(elements.modal, {
-        opacity: 0,
-        duration: 0.15,
-        onComplete: () => elements.modal.classList.add('pointer-events-none')
-      });
+
+    /* ============================================================
+       DELETE ATTENDANCE
+       ============================================================ */
+
+    async function deleteAttendance(id) {
+        if (!window.confirm('Are you sure you want to delete this attendance record?\n\nThis action cannot be undone.')) {
+            return;
+        }
+
+        try {
+            const { error } = await _client.from('attendance').delete().eq('id', id);
+            if (error) throw error;
+
+            alert('Attendance record deleted successfully.');
+
+            const pageStart = ((attendanceCurrentPage - 1) * ATTENDANCE_PAGE_SIZE);
+            if (attendanceTotalRecords - pageStart <= 1 && attendanceCurrentPage > 1) {
+                attendanceCurrentPage--;
+            }
+
+            await Promise.all([loadAttendanceRecords(), loadAttendanceSummary()]);
+        } catch (error) {
+            console.error('Delete attendance error:', error);
+            alert(error.message || 'Unable to delete attendance record.');
+        }
     }
 
-    function viewDetails(recordId) {
-      const rec = state.attendanceRecords.find(r => String(r.id) === String(recordId));
-      if (!rec) return;
 
-      elements.drawerContent.innerHTML = `
-        <div class="space-y-3 text-sm">
-          <div>
-            <span class="text-xs text-slate-400 uppercase font-semibold block">Employee</span>
-            <span class="text-base font-bold text-slate-800">${rec.employee_name}</span>
-            <span class="text-xs font-mono text-slate-500 block">(${rec.employee_number})</span>
-          </div>
-          <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
-            <div>
-              <span class="text-xs text-slate-400 uppercase font-semibold block">Date</span>
-              <span class="font-medium text-slate-700">${formatDisplayDate(rec.attendance_date)}</span>
-            </div>
-            <div>
-              <span class="text-xs text-slate-400 uppercase font-semibold block">Department</span>
-              <span class="font-medium text-slate-700">${rec.department}</span>
-            </div>
-          </div>
-          <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
-            <div>
-              <span class="text-xs text-slate-400 uppercase font-semibold block">Time In</span>
-              <span class="font-medium text-slate-700">${formatDisplayTime(rec.time_in)}</span>
-            </div>
-            <div>
-              <span class="text-xs text-slate-400 uppercase font-semibold block">Time Out</span>
-              <span class="font-medium text-slate-700">${formatDisplayTime(rec.time_out)}</span>
-            </div>
-          </div>
-          <div class="pt-2 border-t border-slate-100">
-            <span class="text-xs text-slate-400 uppercase font-semibold block mb-1">Status</span>
-            ${getStatusBadge(rec.status)}
-          </div>
-          <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-center bg-slate-50 p-2 rounded-lg">
-            <div>
-              <span class="text-xs text-slate-400 block">Late</span>
-              <span class="font-semibold text-slate-700">${rec.late_minutes} m</span>
-            </div>
-            <div>
-              <span class="text-xs text-slate-400 block">Undertime</span>
-              <span class="font-semibold text-slate-700">${rec.undertime_minutes} m</span>
-            </div>
-            <div>
-              <span class="text-xs text-slate-400 block">Overtime</span>
-              <span class="font-semibold text-slate-700">${rec.overtime_hours} h</span>
-            </div>
-          </div>
-          <div class="pt-2 border-t border-slate-100">
-            <span class="text-xs text-slate-400 uppercase font-semibold block">Remarks</span>
-            <p class="text-slate-600 bg-slate-50 p-3 rounded-lg text-xs italic mt-1">${rec.remarks || 'No remarks provided.'}</p>
-          </div>
-        </div>
-      `;
+    /* ============================================================
+       MODAL & DRAWER CONTROLS
+       ============================================================ */
 
-      elements.drawer.classList.remove('pointer-events-none');
-      elements.drawerBackdrop.classList.remove('opacity-0');
-      elements.drawerPanel.classList.remove('translate-x-full');
+    function openAttendanceModal() {
+        const modal = document.getElementById('modal-attendance') || document.getElementById('attendance-modal');
+        const modalContainer = document.getElementById('modal-container');
+        if (!modal) return;
+
+        modal.classList.remove('pointer-events-none', 'hidden');
+        if (typeof gsap !== 'undefined') {
+            gsap.to(modal, { opacity: 1, duration: 0.2 });
+            if (modalContainer) {
+                gsap.to(modalContainer, { scale: 1, duration: 0.25, ease: 'back.out(1.2)' });
+            }
+        }
+    }
+
+    function closeAttendanceModal() {
+        const modal = document.getElementById('modal-attendance') || document.getElementById('attendance-modal');
+        const modalContainer = document.getElementById('modal-container');
+        if (!modal) return;
+
+        if (typeof gsap !== 'undefined') {
+            if (modalContainer) gsap.to(modalContainer, { scale: 0.95, duration: 0.15 });
+            gsap.to(modal, {
+                opacity: 0,
+                duration: 0.15,
+                onComplete: () => {
+                    modal.classList.add('pointer-events-none');
+                    attendanceEditingId = null;
+                }
+            });
+        } else {
+            modal.classList.add('pointer-events-none', 'hidden');
+            attendanceEditingId = null;
+        }
     }
 
     function closeDrawer() {
-      elements.drawerPanel.classList.add('translate-x-full');
-      elements.drawerBackdrop.classList.add('opacity-0');
-      setTimeout(() => elements.drawer.classList.add('pointer-events-none'), 300);
+        const drawerPanel = document.getElementById('drawer-panel');
+        const drawerBackdrop = document.getElementById('drawer-backdrop');
+        const drawer = document.getElementById('drawer-details');
+
+        if (drawerPanel) drawerPanel.classList.add('translate-x-full');
+        if (drawerBackdrop) drawerBackdrop.classList.add('opacity-0');
+        if (drawer) setTimeout(() => drawer.classList.add('pointer-events-none'), 300);
     }
 
-    /* ==========================================
-       FORM SUBMISSION & VALIDATION
-       ========================================== */
-    elements.form.addEventListener('submit', async (e) => {
-      e.preventDefault();
 
-      const recordId = document.getElementById('form-attendance-id').value;
-      const empId = document.getElementById('form-employee').value;
-      const date = document.getElementById('form-date').value;
-      const status = document.getElementById('form-status').value;
-      const timeIn = document.getElementById('form-time-in').value || null;
-      const timeOut = document.getElementById('form-time-out').value || null;
-      const lateMins = parseInt(document.getElementById('form-late').value) || 0;
-      const undertimeMins = parseInt(document.getElementById('form-undertime').value) || 0;
-      const otHours = parseFloat(document.getElementById('form-ot').value) || 0;
-      const remarks = document.getElementById('form-remarks').value;
+    /* ============================================================
+       EVENT LISTENERS & SETUP
+       ============================================================ */
 
-      // Validation Rules
-      if (!empId || !date || !status) {
-        showToast('Please fill in all required fields.', 'error');
-        return;
-      }
-      if (lateMins < 0 || undertimeMins < 0 || otHours < 0) {
-        showToast('Numeric values cannot be negative.', 'error');
-        return;
-      }
-      if (timeIn && timeOut && timeOut < timeIn) {
-        showToast('Time Out cannot be earlier than Time In.', 'error');
-        return;
-      }
+    function setupAttendanceEvents() {
+        const filterSearch = document.getElementById('filter-search') || document.getElementById('search-employee');
+        const filterDateFrom = document.getElementById('filter-date-from') || document.getElementById('date-from');
+        const filterDateTo = document.getElementById('filter-date-to') || document.getElementById('date-to');
+        const filterDept = document.getElementById('filter-dept') || document.getElementById('department-filter');
+        const filterStatus = document.getElementById('filter-status') || document.getElementById('status-filter');
+        const btnClear = document.getElementById('btn-clear-filters') || document.getElementById('clear-filters');
 
-      // Lock Submit Button
-      elements.btnSave.disabled = true;
-      elements.btnSave.innerText = 'Saving...';
+        if (filterSearch) filterSearch.addEventListener('input', debounce(applyAttendanceFilters, 400));
+        if (filterDateFrom) filterDateFrom.addEventListener('change', applyAttendanceFilters);
+        if (filterDateTo) filterDateTo.addEventListener('change', applyAttendanceFilters);
+        if (filterDept) filterDept.addEventListener('change', applyAttendanceFilters);
+        if (filterStatus) filterStatus.addEventListener('change', applyAttendanceFilters);
+        if (btnClear) btnClear.addEventListener('click', clearAttendanceFilters);
 
-      try {
-        // Prevent Duplicate Record check for same employee and date
-        let dupQuery = _supabase.from('attendance')
-          .select('id')
-          .eq(getColName(['employee_id', 'emp_id']), empId)
-          .eq(getColName(['attendance_date', 'date']), date);
+        const form = document.getElementById('attendance-form');
+        if (form) form.addEventListener('submit', saveAttendance);
 
-        if (recordId) {
-          dupQuery = dupQuery.neq('id', recordId);
+        const btnOpenModal = document.getElementById('btn-open-modal') || document.getElementById('add-attendance');
+        if (btnOpenModal) {
+            btnOpenModal.addEventListener('click', () => {
+                attendanceEditingId = null;
+                if (form) form.reset();
+                const formId = document.getElementById('form-attendance-id');
+                if (formId) formId.value = '';
+                const modalTitle = document.getElementById('modal-title');
+                if (modalTitle) modalTitle.innerText = 'Record Attendance';
+                const formDate = document.getElementById('form-date');
+                if (formDate) formDate.value = new Date().toISOString().split('T')[0];
+                openAttendanceModal();
+            });
         }
 
-        const { data: existing } = await dupQuery;
-        if (existing && existing.length > 0) {
-          showToast('Attendance record already exists for this date.', 'error');
-          elements.btnSave.disabled = false;
-          elements.btnSave.innerText = 'Save';
-          return;
-        }
+        const btnCloseModal = document.getElementById('btn-close-modal');
+        const btnCancelModal = document.getElementById('btn-cancel-modal');
+        if (btnCloseModal) btnCloseModal.addEventListener('click', closeAttendanceModal);
+        if (btnCancelModal) btnCancelModal.addEventListener('click', closeAttendanceModal);
 
-        // Construct Database Payload utilizing actual schema mapping
-        const payload = {};
-        payload[getColName(['employee_id', 'emp_id'])] = empId;
-        payload[getColName(['attendance_date', 'date'])] = date;
-        payload[getColName(['status'])] = status;
-        payload[getColName(['time_in'])] = timeIn;
-        payload[getColName(['time_out'])] = timeOut;
-        payload[getColName(['late_minutes', 'late'])] = lateMins;
-        payload[getColName(['undertime_minutes', 'undertime'])] = undertimeMins;
-        payload[getColName(['overtime_hours', 'overtime'])] = otHours;
-        payload[getColName(['remarks'])] = remarks;
+        const btnCloseDrawer = document.getElementById('btn-close-drawer');
+        const btnDrawerClose = document.getElementById('btn-drawer-close');
+        const drawerBackdrop = document.getElementById('drawer-backdrop');
+        if (btnCloseDrawer) btnCloseDrawer.addEventListener('click', closeDrawer);
+        if (btnDrawerClose) btnDrawerClose.addEventListener('click', closeDrawer);
+        if (drawerBackdrop) drawerBackdrop.addEventListener('click', closeDrawer);
 
-        let saveError;
-        if (recordId) {
-          // UPDATE
-          const { error } = await _supabase.from('attendance').update(payload).eq('id', recordId);
-          saveError = error;
-        } else {
-          // INSERT
-          const { error } = await _supabase.from('attendance').insert([payload]);
-          saveError = error;
-        }
-
-        if (saveError) throw saveError;
-
-        showToast(recordId ? '✓ Attendance updated successfully.' : '✓ Attendance recorded successfully.', 'success');
-        closeModal();
-        await refreshData();
-
-      } catch (err) {
-        console.error(err);
-        showToast('✕ Unable to save attendance.', 'error');
-      } finally {
-        elements.btnSave.disabled = false;
-        elements.btnSave.innerText = 'Save';
-      }
-    });
-
-    /* ==========================================
-       DELETE ACTION
-       ========================================== */
-    async function confirmDelete(recordId) {
-      if (!confirm('Delete attendance record?\nThis action cannot be undone.')) return;
-
-      try {
-        const { error } = await _supabase.from('attendance').delete().eq('id', recordId);
-        if (error) throw error;
-
-        showToast('✓ Attendance deleted successfully.', 'success');
-        await refreshData();
-      } catch (err) {
-        console.error(err);
-        showToast('✕ Unable to delete attendance record.', 'error');
-      }
-    }
-
-    /* ==========================================
-       EVENT LISTENERS & FILTERS
-       ========================================== */
-    function attachEventListeners() {
-      document.getElementById('btn-open-modal').addEventListener('click', openCreateModal);
-      document.getElementById('btn-close-modal').addEventListener('click', closeModal);
-      document.getElementById('btn-cancel-modal').addEventListener('click', closeModal);
-
-      document.getElementById('btn-close-drawer').addEventListener('click', closeDrawer);
-      document.getElementById('btn-drawer-close').addEventListener('click', closeDrawer);
-      elements.drawerBackdrop.addEventListener('click', closeDrawer);
-
-      // Filter Events
-      const triggerFilterUpdate = () => {
-        state.filters.search = elements.filterSearch.value.trim();
-        state.filters.dateFrom = elements.filterDateFrom.value;
-        state.filters.dateTo = elements.filterDateTo.value;
-        state.filters.department = elements.filterDept.value;
-        state.filters.status = elements.filterStatus.value;
-        state.pagination.currentPage = 1;
-
-        refreshData();
-      };
-
-      elements.filterSearch.addEventListener('input', debounce(triggerFilterUpdate, 300));
-      elements.filterDateFrom.addEventListener('change', triggerFilterUpdate);
-      elements.filterDateTo.addEventListener('change', triggerFilterUpdate);
-      elements.filterDept.addEventListener('change', triggerFilterUpdate);
-      elements.filterStatus.addEventListener('change', triggerFilterUpdate);
-
-      elements.btnClearFilters.addEventListener('click', () => {
-        elements.filterSearch.value = '';
-        elements.filterDateFrom.value = '';
-        elements.filterDateTo.value = '';
-        elements.filterDept.value = '';
-        elements.filterStatus.value = '';
-        triggerFilterUpdate();
-      });
-    }
-
-    /* ==========================================
-       UTILITIES & FORMATTERS
-       ========================================== */
-    function getEmpFullName(emp) {
-      if (emp.full_name) return emp.full_name;
-      if (emp.first_name || emp.last_name) {
-        return `${emp.first_name || ''} ${emp.last_name || ''}`.trim();
-      }
-      return 'Unknown Employee';
-    }
-
-    function formatDisplayDate(dateStr) {
-      if (!dateStr) return '--';
-      const d = new Date(dateStr + 'T00:00:00');
-      return d.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
-    }
-
-    function formatDisplayTime(timeStr) {
-      if (!timeStr) return '--';
-      // Handles HH:mm or HH:mm:ss format
-      const parts = timeStr.split(':');
-      if (parts.length < 2) return timeStr;
-
-      let hours = parseInt(parts[0]);
-      const minutes = parts[1];
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      hours = hours % 12 || 12;
-      const strHours = hours < 10 ? '0' + hours : hours;
-
-      return `${strHours}:${minutes} ${ampm}`;
-    }
-
-    function getStatusBadge(status) {
-      const st = (status || '').toUpperCase();
-      switch (st) {
-        case 'PRESENT':
-          return `<span class="px-2.5 py-1 text-xs font-bold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">PRESENT</span>`;
-        case 'LATE':
-          return `<span class="px-2.5 py-1 text-xs font-bold rounded-full bg-amber-100 text-amber-800 border border-amber-200">LATE</span>`;
-        case 'ABSENT':
-          return `<span class="px-2.5 py-1 text-xs font-bold rounded-full bg-rose-100 text-rose-800 border border-rose-200">ABSENT</span>`;
-        case 'ON_LEAVE':
-          return `<span class="px-2.5 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800 border border-blue-200">ON_LEAVE</span>`;
-        case 'UNDERTIME':
-          return `<span class="px-2.5 py-1 text-xs font-bold rounded-full bg-orange-100 text-orange-800 border border-orange-200">UNDERTIME</span>`;
-        default:
-          return `<span class="px-2.5 py-1 text-xs font-bold rounded-full bg-slate-100 text-slate-700">${st}</span>`;
-      }
-    }
-
-    function showToast(message, type = 'success') {
-      const toast = document.createElement('div');
-      const isError = type === 'error';
-      toast.className = `p-4 rounded-lg shadow-lg text-white text-sm font-medium flex items-center space-x-2 transform translate-y-4 opacity-0 transition-all duration-300 pointer-events-auto ${isError ? 'bg-rose-600' : 'bg-slate-900'}`;
-      toast.innerHTML = `<span>${message}</span>`;
-
-      const container = document.getElementById('toast-container');
-      container.appendChild(toast);
-
-      gsap.to(toast, { opacity: 1, y: 0, duration: 0.3 });
-
-      setTimeout(() => {
-        gsap.to(toast, {
-          opacity: 0, y: 10, duration: 0.3, onComplete: () => toast.remove()
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') {
+                closeAttendanceModal();
+                closeDrawer();
+            }
         });
-      }, 3500);
     }
 
     function debounce(func, delay) {
-      let timeout;
-      return (...args) => {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), delay);
-      };
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), delay);
+        };
     }
-  </script>
+
+
+    /* ============================================================
+       INITIALIZATION
+       ============================================================ */
+
+    async function initializeAttendanceModule() {
+        setupAttendanceEvents();
+        await Promise.all([
+            loadAttendanceDepartments(),
+            loadAttendanceEmployees()
+        ]);
+        await Promise.all([
+            loadAttendanceRecords(),
+            loadAttendanceSummary()
+        ]);
+
+        if (typeof AOS !== 'undefined') {
+            AOS.init({ duration: 500, once: true, offset: 40 });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        initializeAttendanceModule();
+    });
+    </script>
 </body>
 </html>

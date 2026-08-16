@@ -491,7 +491,7 @@
             currentPage: 1,
             pageSize: 25,
             totalRecords: 0,
-            leaveTableTarget: 'leaves', // Will automatically fallback to leave_requests if needed
+            leaveTableTarget: 'leaves',
             filters: {
                 search: '',
                 departmentId: '',
@@ -525,13 +525,11 @@
             filterStatus: document.getElementById('filter-status'),
             filterStart: document.getElementById('filter-start-date'),
             filterEnd: document.getElementById('filter-end-date'),
-            // Modal DOMs
             modalForm: document.getElementById('modal-leave-form'),
             modalFormCard: document.getElementById('modal-leave-card'),
             modalDetail: document.getElementById('modal-detail'),
             modalDetailCard: document.getElementById('modal-detail-card'),
             modalConfirm: document.getElementById('modal-confirm'),
-            // Forms
             leaveForm: document.getElementById('leave-form'),
             formLeaveId: document.getElementById('form-leave-id'),
             formEmployeeId: document.getElementById('form-employee-id'),
@@ -645,7 +643,6 @@
         }
 
         async function verifyLeaveTableTarget() {
-            // Check if primary 'leaves' table exists; if error, switch target to 'leave_requests'
             const { error } = await supabaseClient.from('leaves').select('id').limit(1);
             if (error && error.message.includes('does not exist')) {
                 state.leaveTableTarget = 'leave_requests';
@@ -785,7 +782,6 @@
                     typeCounts[item.leave_type] = (typeCounts[item.leave_type] || 0) + 1;
                 });
 
-                // Update KPI Cards
                 document.getElementById('kpi-total').textContent = counts.total;
                 document.getElementById('kpi-pending').textContent = counts.PENDING;
                 document.getElementById('kpi-approved').textContent = counts.APPROVED;
@@ -799,7 +795,6 @@
         }
 
         function renderCharts(statusCounts, typeCounts) {
-            // Chart 1: Status Distribution
             Highcharts.chart('chart-status', {
                 chart: { type: 'pie', backgroundColor: 'transparent' },
                 title: { text: null },
@@ -822,7 +817,6 @@
                 }]
             });
 
-            // Chart 2: Types Breakdown
             const typeSeries = Object.keys(typeCounts).map(k => ({ name: k, y: typeCounts[k] }));
             Highcharts.chart('chart-types', {
                 chart: { type: 'column', backgroundColor: 'transparent' },
@@ -1229,7 +1223,6 @@
             }
         }
 
-        // Initialize Application
         document.addEventListener('DOMContentLoaded', initPage);
     </script>
 </body>
